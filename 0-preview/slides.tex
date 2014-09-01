@@ -1,6 +1,6 @@
 
 % xetex expected
-\documentclass[xetex]{beamer}
+\documentclass[xetex,professionalfont]{beamer}
 
 % we want math
 \usepackage{amsmath}
@@ -22,7 +22,7 @@
 %   \begin{minted}{python}
 %   codeb
 %   \end{minted}
-\usepackage{minted}
+% \usepackage{minted}
 
 % better looking tables
 % usage:
@@ -54,6 +54,9 @@
 \usepackage[english]{babel}
 
 % -----------------------------------------------------------------------------
+
+% specify PDF metadata
+\hypersetup{pdftitle={CVSP VO - Preview},pdfsubject={},pdfauthor={Christopher Pramerdorfer}}
 
 % copyright font style
 \makeatletter\renewcommand{\CRB@setcopyrightfont}{\tiny\color{lightgray}}
@@ -121,7 +124,7 @@
 \begin{frame}
 \frametitle{Lecture Topics}
 
-Three parts:
+Three parts
 \begin{itemize}
 	\item Computer Vision (CV) software and resources
 	\item Models vs.\ algorithms
@@ -136,12 +139,11 @@ Three parts:
 \frametitle{Lecture Topics}
 \framesubtitle{Computer Vision Software and Resources}
 
-Popular software packages:
+CV programming languages and libraries
 \begin{itemize}
 	\item Matlab
-	\item NumPy + SciPy + scikit-learn
-	\item OpenCV, PCL
-	\item ...
+	\item Python (NumPy, SciPy, scikit-learn, ...)
+	\item C++ (OpenCV, Shark, Caffe, ...)
 \end{itemize}
 
 \end{frame}
@@ -152,7 +154,7 @@ Popular software packages:
 \frametitle{Lecture Topics}
 \framesubtitle{Computer Vision Software and Resources}
 
-CV programming resources (throughout lecture):
+CV programming resources (throughout lecture)
 \begin{itemize}
 	\item Online tutorials
 	\item Link collections
@@ -166,7 +168,7 @@ CV programming resources (throughout lecture):
 \frametitle{Lecture Topics}
 \framesubtitle{Models vs. Algorithms}
 
-How to approach CV problems systematically:
+How to approach CV problems systematically
 \begin{itemize}
 	\item Difference between models and algorithms
 	\item How to model and solve CV problems
@@ -181,16 +183,15 @@ How to approach CV problems systematically:
 \frametitle{Lecture Topics}
 \framesubtitle{Selected CV Applications}
 
-CV applications with commercial success:
+CV applications with commercial success
 \begin{itemize}
 	\item Face detection and panorama stitching in cameras
-	\item Pose estimation from 3D data for gaming (Kinect)
-	\item Face recognition
-	\item ...
+	\item Player pose estimation from 3D data for gaming (Kinect)
+	\item Face and object recognition
 \end{itemize}
 
 \bigskip
-We will see:
+We will see
 \begin{itemize}
 	\item How they work
 	\item How they are implemented
@@ -216,14 +217,14 @@ We will see:
 \begin{frame}
 \frametitle{Prerequisites}
 
-Basic image processing and computer vision knowledge:
+Basic image processing and computer vision knowledge
 \begin{itemize}
 	\item What is linear filtering?
 	\item What is a camera matrix?
 \end{itemize}
 
 \bigskip
-Some knowledge of probability is recommended:
+Some knowledge of probability is recommended
 \begin{itemize}
 	\item What is a normal distribution?
 	\item What is Bayes' rule?
@@ -248,10 +249,10 @@ Dates will be posted on \url{http://www.caa.tuwien.ac.at/cvl/teaching/winterseme
 \begin{frame}
 \frametitle{Associated Lab Exercise}
 
-We recommend the associated lab exercise to:
+We recommend the associated lab exercise to
 \begin{itemize}
 	\item Explore a CV topic of your choice in more detail
-	\item Get used to software packages covered in this lecture
+	\item Get used to software covered in this lecture
 \end{itemize}
 
 \end{frame}

@@ -51,12 +51,15 @@
 \usepackage{copyrightbox}
 
 % better bibliographies
-\usepackage[backend=biber,style=numeric]{biblatex}
+\usepackage[backend=biber,style=authoryear]{biblatex}
 
 % language support (english,ngerman)
 \usepackage[english]{babel}
 
 % -----------------------------------------------------------------------------
+
+% specify PDF metadata
+\hypersetup{pdftitle={CVSP VO - Languages and Libraries},pdfsubject={},pdfauthor={Christopher Pramerdorfer}}
 
 % copyright font style
 \makeatletter\renewcommand{\CRB@setcopyrightfont}{\tiny\color{lightgray}}
@@ -181,7 +184,7 @@ Many IP operations are local and sequential
 \framesubtitle{Many IP Operations are Local and Sequential}
 
 Resampling is independent for each pixel\\
-Usually involves some form of interpolation
+Involves some form of local interpolation
 
 \bigskip
 \begin{center}
@@ -219,7 +222,7 @@ Local neighborhood operators such as linear filtering:
 More generally, CV programming is all about numbers
 
 \bigskip
-Often, there are many of them:
+Often, there are many of them
 \begin{itemize}
 	\item BD stream: $\sim$ 50 million/sec % 1920*1080*24
 	\item Large optimization problems (\eg bundle adjustment) \\ \url{https://www.youtube.com/watch?v=HrgHFDPJHXo}
@@ -286,7 +289,7 @@ Language bottlenecks can be avoided by switching language
 In summary, efficiency is often of little concern
 
 \bigskip
-There are other factors:
+There are other factors
 \begin{itemize}
 	\item Ease of development (language features, libraries, IDEs)
 	\item OS and platform support % does it run on all OS? does it run on ARM like the odroid shown below?
@@ -306,7 +309,7 @@ There are other factors:
 \begin{frame}
 \frametitle{Choosing a Programming Language}
 
-\emph{There is no \enquote{best} language}, it depends:
+\emph{There is no \enquote{best} language}, it depends
 \begin{itemize}
 	\item On the task at hand % pedestrian detection ...
 	\item On the operating conditions % for a paper? speed usually not important / for use in cars? different story!
@@ -374,14 +377,14 @@ Used in many courses at TU Wien
 \frametitle{Popular CV Programming Languages}
 \framesubtitle{Matlab}
 
-Pros:
+Pros
 \begin{itemize}
 	\item Easy to learn and use
 	\item Many high-quality toolboxes
 \end{itemize}
 
 \bigskip
-Cons:
+Cons
 \begin{itemize}
 	\item Not as fast/efficient from scratch as C++ % code is fast if vectorized, but that can be tedious work
 	\item Commercial licenses are expensive
@@ -404,13 +407,7 @@ Free and open source % This applies to the Cython reference implementation
 
 \bigskip
 No IP/CV functionality by default \\
-But great open-source libraries:
-\begin{itemize}
-	\item NumPy
-	\item SciPy, scikit-image % scipy is an umbrella term and contains all the below packages, but it is a library itself as well
-	\item scikit-learn
-	\item matplotlib
-\end{itemize}
+But great open-source libraries
 
 \column{0.25\textwidth}
 
@@ -430,7 +427,7 @@ But great open-source libraries:
 \frametitle{Popular CV Programming Languages}
 \framesubtitle{Python}
 
-Pros:
+Pros
 \begin{itemize}
 	\item Easy to learn and use
 	\item Extensive standard library
@@ -438,7 +435,7 @@ Pros:
 \end{itemize}
 
 \bigskip
-Cons:
+Cons
 \begin{itemize}
 	\item Not as integrated as Matlab
 	\item Not as fast/efficient from scratch as C++ % code is fast if vectorized, but that can be tedious work
@@ -602,12 +599,7 @@ Focus on performance and efficiency
 
 \bigskip
 No IP/CV functionality by default \\
-But great open-source libraries:
-\begin{itemize}
-	\item OpenCV
-	\item Shark, Caffe
-	\item MathGL
-\end{itemize}
+But great open-source libraries
 
 \column{0.25\textwidth}
 
@@ -627,14 +619,14 @@ But great open-source libraries:
 \frametitle{Popular CV Programming Languages}
 \framesubtitle{C++}
 
-Pros:
+Pros
 \begin{itemize}
 	\item Fast and memory-efficient
 	\item Free and open source
 \end{itemize}
 
 \bigskip
-Cons:
+Cons
 \begin{itemize}
 	\item Harder to learn and master
 	\item Slower and less convenient to code
@@ -752,7 +744,7 @@ Many libraries have language bindings
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Language Comparison}
+\frametitle{Code Comparison}
 
 Task is to load, blur, show, and save an image
 
@@ -761,7 +753,7 @@ Task is to load, blur, show, and save an image
 % -----------------------------------------------------------------------------
 
 \begin{frame}[fragile]
-\frametitle{Language Comparison}
+\frametitle{Code Comparison}
 \framesubtitle{Matlab}
 
 \begin{minted}{matlab}
@@ -777,7 +769,7 @@ imwrite(blur, 'blur.png'); % save
 % -----------------------------------------------------------------------------
 
 \begin{frame}[fragile]
-\frametitle{Language Comparison}
+\frametitle{Code Comparison}
 \framesubtitle{Python with scikit-image}
 
 \begin{minted}{python}
@@ -793,7 +785,7 @@ skimage.io.imsave('blur.png', blur) # save
 % -----------------------------------------------------------------------------
 
 \begin{frame}[fragile]
-\frametitle{Language Comparison}
+\frametitle{Code Comparison}
 \framesubtitle{C++ with OpenCV}
 
 \begin{minted}{cpp}
@@ -810,12 +802,12 @@ cv::imwrite("blur.png", blur); // save
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Language Comparison}
+\frametitle{Code Comparison}
 
 Similar programming effort in the example case
 
 \bigskip
-For many larger CV tasks:
+For many larger CV tasks
 \begin{itemize}
 	\item Matlab requires least effort
 	\item Closely followed by Python
@@ -829,7 +821,7 @@ For many larger CV tasks:
 \begin{frame}
 \frametitle{Language Comparison}
 
-In summary, the discussed languages:
+In summary, the discussed languages
 \begin{itemize}
 	\item Differ in terms of execution speed and memory-efficiency
 	\item Provide comparable CV programming functionality via libraries
@@ -837,9 +829,9 @@ In summary, the discussed languages:
 \end{itemize}
 
 \bigskip
-So, to conclude:
+So, to conclude
 \begin{itemize}
-	\item \emph{There is no best CV language}
+	\item There is \emph{no best CV language}
 	\item \emph{Different tasks favor different languages}
 \end{itemize}
 
@@ -850,14 +842,18 @@ So, to conclude:
 \begin{frame}
 \frametitle{Suggestions on Language Selection}
 
-Know the strengths and weaknesses of different languages\\\medskip
+Know the strengths and weaknesses of different languages\\
 Be proficient in more than one language
+\begin{itemize}
+	\item Allows you to select appropriate language for task at hand
+\end{itemize}
 
 \bigskip
 Learn C++
 \begin{itemize}
 	\item Modern C++ is not a bad language if used correctly
-	\item Many companies rely on it
+	\item Some real-time applications require its speed and efficiency
+	\item Many companies use it
 \end{itemize}
 
 \end{frame}

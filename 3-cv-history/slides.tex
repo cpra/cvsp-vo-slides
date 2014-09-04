@@ -133,11 +133,11 @@
 \begin{frame}
 \frametitle{Topics}
 
+Selection of past, present, future CV applications\\\medskip
+More detailed coverage in upcoming lectures
+
+\bigskip
 \begin{center}
-	Selection of past, present, future CV algorithms and applications
-
-	\bigskip\bigskip
-
 	\copyrightbox[b]
 	{\includegraphics[width=10cm]{figures/intro-collage.png}}
 	{\centering Images from \cite{lecun1989}, \cite{shotton2011}, \cite{taigman2013}}
@@ -152,7 +152,7 @@
 
 Make computers understand images and videos
 \begin{itemize}
-	\item Different levels of understanding % picture of two persons vs "two professors arguing in front of a blackboard"
+	\item Different levels of understanding % picture of two persons vs "two professors arguing in front of a blackboard" -> see last slide
 \end{itemize}
 
 \bigskip
@@ -164,8 +164,7 @@ CV is hard
 \bigskip
 Still, CV has been successfully used in a variety of applications
 \begin{itemize}
-	\item This lecture introduces a few
-	\item More detailed discussion in upcoming lecturers
+	\item This lecture introduces a few in chronological order
 \end{itemize}
 
 \end{frame}
@@ -175,15 +174,14 @@ Still, CV has been successfully used in a variety of applications
 \begin{frame}
 \frametitle{1963: Pose Estimation}
 
-Blocks World by Larry Roberts\\\medskip
-Edge based pose estimation of polyhedra \\\medskip % based on relative orientation of edges
-Marks the Advent of CV
+Edge-based pose estimation of polyhedra \\\medskip % based on relative orientation of edges
+Among first CV applications % but not the first as often claimed, see Steve Seitz's slides
 
-\medskip
+\bigskip
 \begin{center}
 	\copyrightbox[b]
 	{\includegraphics[width=7cm]{figures/blocks-world.png}} % input image, gradient-based edge detection, rendered objects from different viewpoint after recognition
-	{\centering Image from Roberts' thesis}
+	{\centering Image from \cite{roberts1963}}
 \end{center}
 
 \end{frame}
@@ -191,6 +189,226 @@ Marks the Advent of CV
 % -----------------------------------------------------------------------------
 
 \begin{frame}
+\frametitle{1973: Part-Based Object Detection}
+
+Object representation as parts connected by springs\\\medskip % springs illustrate spatial relations
+Known as pictorial structures or constellation models % can be solved in polynomial time via DP if the relation graph is a tree / still used today in improved form
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=4.5cm]{figures/constellation-model.png}}
+	{\centering Image from \cite{fischler1973}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{1989: OCR via Deep Learning}
+
+% good article on DL history: http://www.wired.com/2014/01/geoffrey-hinton-deep-learning
+
+Zip code recognition from images\\\medskip % from us postal service codes, manual preprocessing to obtain one image per digit
+Among first applications using deep convolutional neural networks % but they had been proposed before, see LeCun's paper
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=4cm]{figures/zip-numbers.png}}
+	{\centering Image from \cite{lecun1989}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{1989: OCR via Deep Learning}
+\framesubtitle{Network Architecture}
+
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=6.5cm]{figures/zip-dnn.png}} % input is 16x16=256, h1 and h2 are convolutional, h3 and output are fully connected. 1256 units, ~65k connections, ~10k params in total
+	{\centering Image from \cite{lecun1989}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{1996: Image-Based Modeling}
+
+Generate a 3D model from a set of images\\\medskip
+Use this model and input images to render new images\\\medskip
+\url{https://www.youtube.com/watch?v=RPhGEiM_6lM} % Facade introduced view-dependent texture mapping (select "best" images for texturing automatically based on similarity of current and image camera view), used for Matrix bullet-time shots according to video description
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=6cm]{figures/facade.jpg}}
+	{\centering Images from \cite{debevec1996}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{2006: Photo Tourism}
+
+3D reconstruction from photo collections\\\medskip
+Structure from Motion (SIFT + bundle adjustment) % these things were developed earlier
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=5cm]{figures/photo-tourism.jpg}}
+	{\centering Images from \cite{snavely2006}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{2006: Photo Tourism}
+\framesubtitle{Microsoft Photosynth}
+
+\begin{center}
+\url{https://photosynth.net}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{2006: Photo Tourism}
+\framesubtitle{Building Rome in a Day}
+
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=7cm]{figures/dubrovnik.jpg}}
+	{\centering Image from \url{https://www.youtube.com/watch?v=sQegEro5Bfo}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{2007: Smart Digital Cameras}
+
+Cameras with face auto focus\\\medskip
+Technology similar to \cite{viola2001}
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=6cm]{figures/camera-faces.jpg}}
+	{\centering Image from \url{olympus-europa.com}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{2011: Kinect}
+
+Depth estimation via active stereo\\\medskip
+Real-time pose estimation of multiple players
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=5cm]{figures/kinect.png}}
+	{\centering Image from \url{wikipedia.org}}
+	\qquad
+	\copyrightbox[b]
+	{\includegraphics[width=4cm]{figures/kinect-pose.png}}
+	{\centering Image from \cite{shotton2011}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{2013: Human-Level Face Verification}
+
+Face verification using a deep convolutional neural network\\\medskip % face verification is 1:1, i.e. to answer the question "does given image depict person X or not?"
+3D face modeling and frontalization\\\medskip
+Verification performance comparable to humans % > 120m parameters, compared to LeCun's ~10k
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=10cm]{figures/deepface.png}}
+	{\centering Image from \cite{taigman2013}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{20xx: Human-Level Object Recognition}
+
+Object recognition without constraints\\\medskip % like occlusions, perspective, background
+Hot research topic \scriptsize(\url{http://image-net.org/challenges/LSVRC/2014/index})\normalsize
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=5cm]{figures/object-detection.png}}
+	{\centering Image from \url{image-net.org}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{20xx: Autonomous Cars}
+
+Cars that drive autonomously\\\medskip
+Major research area (\eg Google) % with nice progress, but far from everyday application ... there are some good articles on this on the web
+\begin{itemize}
+	\item \url{https://www.youtube.com/watch?v=bDOnn0-4Nq8}
+\end{itemize}
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=5cm]{figures/google-car.jpg}}
+	{\centering Image by Google}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{20xx: Human-Level Scene Understanding}
+
+Object recognition and segmentation, motion, context
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=6cm]{figures/planck-bohr.png}}
+	{\centering Image from Larry Zitnick's slides}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[allowframebreaks=0.9]
 \frametitle{Bibliography}
 
 \printbibliography

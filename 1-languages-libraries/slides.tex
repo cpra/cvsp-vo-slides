@@ -67,9 +67,6 @@
 % make emph bold
 \DeclareTextFontCommand{\emph}{\bfseries}
 
-% use proper fonts for math
-% \usefonttheme[onlymath]{serif}
-
 % use tuwcvl beamer theme
 \usetheme{tuwcvl}
 
@@ -166,7 +163,7 @@ We often start with Image Processing (IP)
 	\item Feature extraction
 \end{itemize}
 
-\medskip
+\bigskip
 Involves operations on arrays / matrices
 
 \bigskip
@@ -183,7 +180,7 @@ Many IP operations are local and sequential
 \frametitle{Characteristics of CV Programming}
 \framesubtitle{Many IP Operations are Local and Sequential}
 
-Resampling is independent for each pixel\\
+Resampling is independent for each pixel\\\medskip
 Involves some form of local interpolation
 
 \bigskip
@@ -244,7 +241,7 @@ Some languages are better at crunching numbers than others
 
 But does efficiency matter?
 \begin{itemize}
-	\item Researchers often don't care
+	\item Researchers often don't care % but sometimes they do - for example training convnets can take weeks even on GPUs - would not be feasible without heavy software optimization
 	\item Companies usually do % run more analysis channels on a the same machine = money saved
 	\item Sometimes there are hard constraints (cars, space missions)
 \end{itemize}
@@ -286,7 +283,7 @@ Language bottlenecks can be avoided by switching language
 \begin{frame}
 \frametitle{Choosing a Programming Language}
 
-In summary, efficiency is often of little concern
+In summary, efficiency is often of little concern in research
 
 \bigskip
 There are other factors
@@ -349,15 +346,10 @@ Let's take a look at some popular languages and libraries ...
 \begin{columns}
 \column{0.65\textwidth}
 
-Numerical computing environment \\
-Commercial software (student licenses)
-
-\bigskip
-Widely used in academics \\
+Numerical computing environment \\\medskip
+Commercial software (student licenses)\\\medskip
+Widely used in academics \\\medskip
 Used in many courses at TU Wien
-\begin{itemize}
-	\item You probably already know it
-\end{itemize}
 
 \column{0.25\textwidth}
 
@@ -402,11 +394,9 @@ Cons
 \begin{columns}
 \column{0.65\textwidth}
 
-General-purpose programming language \\
-Free and open source % This applies to the Cython reference implementation
-
-\bigskip
-No IP/CV functionality by default \\
+General-purpose programming language \\\medskip
+Free and open source\\\medskip % This applies to the Cython reference implementation
+No IP/CV functionality by default \\\medskip
 But great open-source libraries
 
 \column{0.25\textwidth}
@@ -594,11 +584,9 @@ Matlab-like syntax
 \begin{columns}
 \column{0.65\textwidth}
 
-General-purpose programming language \\
-Focus on performance and efficiency 
-
-\bigskip
-No IP/CV functionality by default \\
+General-purpose programming language\\\medskip
+Focus on performance and efficiency\\\medskip
+No IP/CV functionality by default\\\medskip
 But great open-source libraries
 
 \column{0.25\textwidth}
@@ -643,7 +631,7 @@ Cons
 \begin{columns}
 \column{0.65\textwidth}
 
-Comprehensive IP/CV library\\
+Comprehensive IP/CV library\\\medskip
 Designed for real-time applications
 
 \bigskip
@@ -811,7 +799,7 @@ For many larger CV tasks
 \begin{itemize}
 	\item Matlab requires least effort
 	\item Closely followed by Python
-	\item No so closely followed by C++
+	\item Not so closely followed by C++
 \end{itemize}
 
 \end{frame}
@@ -842,7 +830,9 @@ So, to conclude
 \begin{frame}
 \frametitle{Suggestions on Language Selection}
 
-Know the strengths and weaknesses of different languages\\
+Know the strengths and weaknesses of different languages
+
+\bigskip
 Be proficient in more than one language
 \begin{itemize}
 	\item Allows you to select appropriate language for task at hand

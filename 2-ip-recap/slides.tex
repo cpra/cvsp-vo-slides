@@ -67,9 +67,6 @@
 % make emph bold
 \DeclareTextFontCommand{\emph}{\bfseries}
 
-% use proper fonts for math
-% \usefonttheme[onlymath]{serif}
-
 % use tuwcvl beamer theme
 \usetheme{tuwcvl}
 
@@ -277,7 +274,7 @@ Transform pixel values so that distribution is \enquote{flat} % not exactly flat
 \begin{minted}{cpp}
 // cv = OpenCV namespace
 cv::Mat img, equalized; // storage
-img = cv::imread("image.png", CV_LOAD_IMAGE_GRAYSCALE); // load
+img = cv::imread("image.png", cv::IMREAD_GRAYSCALE); // load
 cv::equalizeHist(img, equalized); // normalize
 \end{minted}
 
@@ -439,7 +436,7 @@ Substrate for object recognition and scene understanding
 
 \begin{minted}{cpp}
 cv::Mat img, gabor; // storage
-img = cv::imread("image.png", CV_LOAD_IMAGE_GRAYSCALE); // load
+img = cv::imread("image.png", cv::IMREAD_GRAYSCALE); // load
 h = cv::getGaborKernel(...); // create Gabor kernel
 cv::filter2D(img, gabor, CV_32F, h); // filter
 
@@ -461,7 +458,7 @@ Interest points are image features that
 \bigskip
 Which implies that they are
 \begin{itemize}
-	\item \emph{Invariant} to image transformations
+	\item Invariant to image transformations
 	\item Robust with respect to noise
 \end{itemize}
 
@@ -599,7 +596,7 @@ Local maxima are
 % which is used to discard non-corner keypoints.
 
 \begin{minted}{cpp}
-cv::Mat img = cv::imread("image.png", CV_LOAD_IMAGE_GRAYSCALE);
+cv::Mat img = cv::imread("image.png", cv::IMREAD_GRAYSCALE);
 cv::SiftFeatureDetector det(20, 10); // create detector
 std::vector<cv::KeyPoint> kps; // keypoint storage
 det.detect(img, kps); // detect keypoints
@@ -748,9 +745,10 @@ PCA is dependent on the units of $x_i$
 \end{itemize}
 
 \bigskip
-PCA is unsupervised
+PCA is unsupervised and linear
 \begin{itemize}
 	\item Better methods for supervised case (\eg LDA) % check the fisherfaces paper, which illustrates this well
+	\item More powerful non-linear methods (\eg autoencoders)
 	\item But generally superfluous with modern learning methods % SVMs, random forests etc. include means for regularization and feature selection and are thus robust wrt. feature dimension and redundancy
 \end{itemize}
 

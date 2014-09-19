@@ -67,17 +67,11 @@
 % make emph bold
 \DeclareTextFontCommand{\emph}{\bfseries}
 
-% use proper fonts for math
-% \usefonttheme[onlymath]{serif}
-
 % use tuwcvl beamer theme
 \usetheme{tuwcvl}
 
 % add bib file
 \addbibresource{literature.bib}
-
-% smileys :)
-\newfontfamily\DejaSans{DejaVu Sans}
 
 % -----------------------------------------------------------------------------
 
@@ -211,7 +205,7 @@ Known as pictorial structures or constellation models % can be solved in polynom
 % good article on DL history: http://www.wired.com/2014/01/geoffrey-hinton-deep-learning
 
 Zip code recognition from images\\\medskip % from us postal service codes, manual preprocessing to obtain one image per digit
-Among first applications using deep convolutional neural networks % but they had been proposed before, see LeCun's paper
+Among first applications using convolutional neural networks % but they had been proposed before, see LeCun's paper
 
 \bigskip
 \begin{center}
@@ -340,9 +334,9 @@ Real-time pose estimation of multiple players
 \begin{frame}
 \frametitle{2013: Human-Level Face Verification}
 
-Face verification using a deep convolutional neural network\\\medskip % face verification is 1:1, i.e. to answer the question "does given image depict person X or not?"
+Face verification using a deep convolutional neural network\\\medskip % face verification is 1:1, i.e. "do image x and y contain the same person or not?"
 3D face modeling and frontalization\\\medskip
-Verification performance comparable to humans % > 120m parameters, compared to LeCun's ~10k
+Verification performance comparable to humans % 120m parameters, compared to LeCun's ~10k
 
 \bigskip
 \begin{center}

@@ -50,6 +50,9 @@
 % easy way to include copyright information
 \usepackage{copyrightbox}
 
+% better bibliographies
+\usepackage[backend=biber,style=authoryear]{biblatex}
+
 % language support (english,ngerman)
 \usepackage[english]{babel}
 
@@ -64,8 +67,8 @@
 % make emph bold
 \DeclareTextFontCommand{\emph}{\bfseries}
 
-% use proper fonts for math
-\usefonttheme[onlymath]{serif}
+% add bib file
+\addbibresource{literature.bib}
 
 % use tuwcvl beamer theme
 \usetheme{tuwcvl}
@@ -124,12 +127,16 @@
 \begin{frame}
 \frametitle{Lecture Topics}
 
-Three parts
-\begin{itemize}
-	\item Computer Vision (CV) software and resources
-	\item Models vs.\ algorithms
-	\item Selected CV applications with commercial success
-\end{itemize}
+Computer Vision (CV) software and resources\\\medskip
+Models vs.\ algorithms\\\medskip
+CV applications with commercial success
+
+\bigskip
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=10cm]{figures/intro-collage.png}}
+	{\centering Images from \cite{lecun1989}, \cite{shotton2011}, \cite{taigman2013}}
+\end{center}
 
 \end{frame}
 
@@ -139,25 +146,17 @@ Three parts
 \frametitle{Lecture Topics}
 \framesubtitle{Computer Vision Software and Resources}
 
-CV programming languages and libraries
+Programming languages and libraries
 \begin{itemize}
 	\item Matlab
-	\item Python (NumPy, SciPy, scikit-learn, ...)
+	\item Python (SciPy, scikits, ...)
 	\item C++ (OpenCV, Shark, Caffe, ...)
 \end{itemize}
 
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Lecture Topics}
-\framesubtitle{Computer Vision Software and Resources}
-
-CV programming resources (throughout lecture)
+\bigskip
+Programming resources (throughout lecture)
 \begin{itemize}
-	\item Online tutorials
-	\item Link collections
+	\item Code snippets, weblinks
 \end{itemize}
 
 \end{frame}
@@ -210,6 +209,9 @@ We will see
 \bigskip
 \textbf{Schedule}: \url{http://www.caa.tuwien.ac.at/cvl/teaching/wintersemester/cvsp_vo/index.html}
 
+\bigskip
+Follow \texttt{@tuwcvsp} on Twitter for updates
+
 \end{frame}
 
 % -----------------------------------------------------------------------------
@@ -254,6 +256,15 @@ We recommend the associated lab exercise to
 	\item Explore a CV topic of your choice in more detail
 	\item Get used to software covered in this lecture
 \end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Bibliography}
+
+\printbibliography
 
 \end{frame}
 

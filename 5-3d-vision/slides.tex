@@ -62,7 +62,7 @@
 % -----------------------------------------------------------------------------
 
 % specify PDF metadata
-\hypersetup{pdftitle={CVSP VO - 3D Vision Applications},pdfsubject={},pdfauthor={Christopher Pramerdorfer}}
+\hypersetup{pdftitle={CVSP VO - 3D Vision},pdfsubject={},pdfauthor={Christopher Pramerdorfer}}
 
 % copyright font style
 \makeatletter\renewcommand{\CRB@setcopyrightfont}{\tiny\color{lightgray}}
@@ -128,7 +128,7 @@
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
-\subtitle{3D Vision Applications}
+\subtitle{3D Vision}
 \author{Christopher Pramerdorfer}
 \institute{Computer Vision Lab, Vienna University of Technology}
 
@@ -145,17 +145,14 @@
 \begin{frame}
 \frametitle{Topics}
 
-% we focus on Kinect in this lecture because it is so popular and successful
-
 Image formation\\\medskip
-3D data acquisition\\\medskip
-Kinect applications
+3D data acquisition
 
 \bigskip
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=10cm]{figures/intro-collage.png}}
-    {\centering Images from \url{wikipedia.org}, \cite{shotton2011}, \cite{newcombe2011}}
+    {\includegraphics[width=10cm]{figures/intro-collage.jpg}}
+    {\centering Images from \url{wikipedia.org}, \url{createiveapplications.net}}
 \end{center}
 
 \end{frame}
@@ -165,17 +162,13 @@ Kinect applications
 \begin{frame}
 \frametitle{Motivation}
 
-CV is about infering information about the world from images
-\begin{itemize}
-    \item Knowledge of scene geometry beneficial % or even mandatory depending on the problem / we usually know the geometry only partially (like a sparse point cloud)
-\end{itemize}
+Many CV applications rely on knowledge of scene geometry
 
 \bigskip
 This lecture covers
 \begin{itemize}
     \item How scene geometry and images are related
-    \item How this relation can be \enquote{inverted} % that is different means for obtaining an estimation of the scene geometry from images
-    \item CV applications utilizing scene geometry
+    \item How this relation can be used to recover scene geometry % that is different means for obtaining an estimation of the scene geometry from images
 \end{itemize}
 
 \end{frame}
@@ -219,7 +212,7 @@ This lecture covers
 We obtain $x=fu/w+p_x$, $y=fv/w+p_y$ % here we disregard the skew parameter, which is fine with modern cams
 \begin{itemize}
     \item $f$ : focal length in pixels % we have a digital camera, so f is measured in pixels. also, in general it is possible that f differs along x and y due to the spacing of receptor cells, but with modern cams this is usually not the case
-    \item $p_x,p_y$ : image coordinate of the principal point
+    \item $p_x,p_y$ : image coordinates of the principal point % this usually is half the image resolution because the sensor is centered at the optical center, as in the previous image
 \end{itemize}
 
 \bigskip
@@ -228,8 +221,9 @@ This mapping is linear in \emph{homogeneous coordinates} % therefore geometric p
     \lambda
     \tilde{\vx} &=& % we use tilde for homogeneous coordinates with the last one being 1
     \begin{pmatrix}
-         \intr & \vec{0} % the left 3x3 matrix below captures the intrinsic camera parameters, that is the relation between image and world coordinates if the center of projection coincides with the world coordinate system
+         \intr & \vec{0} % the left 3x3 matrix below captures the intrinsic camera parameters, that is the relation between image and world coordinates if the center of projection coincides with the world coordinate system (i.e. if the world and camera coordinate systems are equal)
      \end{pmatrix} \tilde{\vw} \\
+     \lambda
     \begin{pmatrix}
         x \\ y \\ 1
     \end{pmatrix} &=& 
@@ -249,7 +243,7 @@ This mapping is linear in \emph{homogeneous coordinates} % therefore geometric p
 \frametitle{Image Formation}
 \framesubtitle{Pinhole Camera Model}
 
-World and camera coordinate systems usually differ
+World and camera coordinate systems generally differ
 \begin{itemize}
     \item Transform $\vw$ to camera coordinates before projection
 \end{itemize}
@@ -267,7 +261,7 @@ World and camera coordinate systems usually differ
         u \\ v \\ w
     \end{pmatrix} +
     \begin{pmatrix}
-        \tau_x \\ \tau_y \\ \tau_z
+        \tau_u \\ \tau_v \\ \tau_w
     \end{pmatrix}
 \end{eqnarray*}
 
@@ -291,7 +285,7 @@ We obtain the full \emph{pinhole camera model}
 \bigskip
 Standard camera model in CV
 \begin{itemize}
-    \item Usually together with radial distortion correction % while most inaccuracies due to the approximative model can be disregarded, radial distortions can be so severe (depending on the lens) that they must be corrected
+    \item Usually together with radial distortion correction % while most inaccuracies due to the approximative model can usually be disregarded, radial distortions can be so severe (depending on the lens) that they must be corrected
 \end{itemize}
 
 \bigskip
@@ -307,16 +301,16 @@ Approximation to actual image formation
 \begin{frame}
 \frametitle{Computing Scene Geometry}
 
-We could obtain $\vw$ by inverting the pinhole camera model % respectively the 4x4 camera matrix, see above
+We can obtain $\vw$ by inverting the pinhole camera model % respectively the 4x4 camera matrix, see above
 \begin{itemize}
-    \item But we don't know $w$ % see the above figure ... w = lambda is lost during perspective projection ... lambda*~x in the above equation corresponds to the ray that intersects both x (at lambda=1), w (at lambda=w), and the optical center (at lambda=0) ... if we dont know lambda, we dont know "where to stop". note that this only applies in the above simplified model ("no" extrinsics, px=py=0, f=1)
+    \item But we don't know $w$ % see the above figure ... w = lambda is lost during perspective projection ... in normalized coodinates ("no" extrinsics, px=py=0, f=1), lambda*~x in the above equation corresponds to the ray that intersects both x (at lambda=1), w (at lambda=w), and the optical center (at lambda=0) ... if we dont know lambda, we dont know "where to stop"
 \end{itemize}
 
 \bigskip
 To this end, we must
 \begin{itemize}
     \item Utilize information from multiple images % of the same scene
-    \item Use sensors that capture $w$ (depth sensors)
+    \item Use sensors that capture $w$ directly
 \end{itemize}
 
 % note that this is not exhaustive. for example there are methods that can be used if we know the reflectance properties of the objects we observe, and if the scene is planar we can reconstruct it as well ... here we talk about means that work in general, without knowledge of the scene
@@ -345,14 +339,14 @@ To this end, we must
 
 In \emph{stereo reconstruction} we have
 \begin{itemize}
-    \item $n$ point correspondences $\{(\vx_1,\vx_2)\}$ in two images % works also with multiple cameras of course
+    \item Point correspondences $\{(\vx_1,\vx_2)\}$ in two images % works also with multiple cameras of course
     \item Taken with calibrated cameras (known $\intr, \boldsymbol{\Omega}, \boldsymbol{\tau}$)
 \end{itemize}
 
 \bigskip
 Goal is to estimate corresponding world coordinates $\vw$
 \begin{itemize}
-    \item Accomplished via triangulation
+    \item Accomplished via triangulation % we know the two rays on which the point must lie. since both x1 and x2 are projections of the same point, the corresponding rays intersect at some point, namely at w
 \end{itemize}
 
 \end{frame}
@@ -382,7 +376,7 @@ The challenge is finding correspondences
 \bigskip
 We typically want
 \begin{itemize}
-    \item Many correspondences to obtain a dense 3D model
+    \item Many correspondences % so that we get a dense 3d reconstruction
     \item High accuracy and low noise
 \end{itemize}
 
@@ -390,7 +384,7 @@ We typically want
 Usually accomplished via
 \begin{itemize}
     \item Dense feature matching along epipolar lines
-    \item Local or global optimization % here we basically enforce that adjacent pixels have similar w, that is some form of regularization. see next slides
+    \item Followed by local or global optimization % here we basically enforce that adjacent pixels have similar w, that is some form of regularization. see next slides
 \end{itemize}
 
 \end{frame}
@@ -401,14 +395,14 @@ Usually accomplished via
 \frametitle{Computing Scene Geometry}
 \framesubtitle{Stereo}
 
-$\vx_1$ must lie on the \emph{epipolar line}
+$\vx_1$ must lie on the \emph{epipolar line} % this significantly reduces the complexity
 \begin{itemize}
-    \item Given by $\vx_0$ and the camera parameters
+    \item Given by $\vx_0$ and the camera parameters % relation between the cameras, see below commend
 \end{itemize}
 
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=6cm]{figures/epipolar-geometry.pdf}} % if we have two calibrated cameras, the point x1 that corresponds to x0 must lie on the epipolar line that is given by the essential matrix E, ~x1*E*~x0=0 ... see Szeliski's book
+    {\includegraphics[width=6cm]{figures/epipolar-geometry.pdf}} % if we have two calibrated cameras, the point x1 that corresponds to x0 must lie on the epipolar line that is given by the essential matrix E, ~x1*E*~x0=0 ... ee Szeliski's book
     {\centering Image from \cite{szeliski2010}}
 \end{center}
 
@@ -423,10 +417,10 @@ $\vx_1$ must lie on the \emph{epipolar line}
 Images are \emph{rectified} before correspondence search % this transforms the images so that x0 and x1 lie on the same scanline in both images, which facilitates the correspondence search
 \begin{itemize}
     \item Relation between $x$-offset (\emph{disparity} $d$) and $w$, $d=fb/w$ % f is again the focal length in pixels
-    \item $b$ is the distance between the cameras 
+    \item $b$ is the distance between the cameras % along u because the cams are aligned (see below)
 \end{itemize}
 
-% rectification transforms the image pair as if it was captures with only an offset along x (as shown in the Kodak camera image above)
+% rectification transforms the image pair as if it was captures with only an offset along u (as shown in the Kodak camera image above)
 
 \bigskip
 \begin{center}
@@ -443,7 +437,7 @@ Images are \emph{rectified} before correspondence search % this transforms the i
 \frametitle{Computing Scene Geometry}
 \framesubtitle{Stereo}
 
-Dense matching on rectified images results in a disparity map
+Dense matching on rectified images results in a \emph{disparity map}
 
 \bigskip
 \begin{center}
@@ -462,7 +456,7 @@ Dense matching on rectified images results in a disparity map
 
 Raw disparity maps are noisy\\\medskip
 Quality can be improved by encouraging smoothness\\\medskip
-Accomplished via graphical models (\eg MRFs)
+Accomplished via graphical models (\eg MRFs) % we always talk about models, which we've introduced earlier. see Prince for more information
 
 \bigskip
 \begin{center}
@@ -470,21 +464,6 @@ Accomplished via graphical models (\eg MRFs)
     {\includegraphics[width=10cm]{figures/dense-stereo-models.jpg}}
     {\centering Images from \cite{prince12}}
 \end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Computing Scene Geometry}
-\framesubtitle{Stereo}
-
-Limitations of image-based (passive) stereo
-\begin{itemize}
-    \item No correspondences in regions without texture % we can interpolate of course
-    \item Relies on proper illumination (no dark living rooms) % Kinect ...
-    \item Computational complexity % this can be an issue ... global optimization is quite complex
-\end{itemize}
 
 \end{frame}
 
@@ -503,9 +482,9 @@ Alternatively, we can use sensors that capture $w$ directly
 These \emph{depth sensors}
 \begin{itemize}
     \item Do not rely on texture
-    \item Are not (significantly) affected by lighting conditions
+    \item Work under dim or dark conditions
+    \item Save computational resources % because they to stereo matching on the sensor
 \end{itemize}
-% they also free computational resources because they provide w or d (but we might still need to improve on this with some sensors)
 
 \end{frame}
 
@@ -516,7 +495,7 @@ These \emph{depth sensors}
 \framesubtitle{Depth Sensors -- Kinect v1}
 
 Released by Microsoft for Xbox 360 in late 2010\\\medskip
-Fastest selling consumer electronics device % according to http://www.guinnessworldrecords.com/records-9000/fastest-selling-gaming-peripheral/
+Fastest selling consumer electronics device to date % according to http://www.guinnessworldrecords.com/records-9000/fastest-selling-gaming-peripheral/
 
 \bigskip
 \begin{center}
@@ -533,11 +512,147 @@ Fastest selling consumer electronics device % according to http://www.guinnesswo
 \frametitle{Computing Scene Geometry}
 \framesubtitle{Depth Sensors -- Kinect v1}
 
+Works by replacing one sensor with an IR source
+\begin{itemize}
+    \item Projects a speckle pattern onto objects \url{https://www.youtube.com/watch?v=t5joFtzEYpo}
+\end{itemize}
+
+\bigskip
+Pattern is observed using an IR sensor 
+
+\bigskip
+Stereo (epipolar) geometry still applies % we now just project light, not measure it, but we still have a rectified stereo pair (look at the image of the sensor)
+\begin{itemize}
+    \item Shift between patterns corresponds to $d$ respectively $w$ % shift between projected and observed pattern
+\end{itemize}
+
+\bigskip
+Does not work in sunlight due to IR radiation % i.e. indoor only!
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Computing Scene Geometry}
+\framesubtitle{Depth Sensors -- Kinect v1}
+
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=7cm]{figures/kinect-promo.jpg}}
-    {\centering Image from \url{https://www.youtube.com/watch?v=p2qlHoxPioM}}
+    {\includegraphics[width=10cm]{figures/kinect-matlab-screenshot.jpg}}
+    {\centering Image from \url{https://www.youtube.com/watch?v=oOCMr0D7BqY}}
 \end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Computing Scene Geometry}
+\framesubtitle{Depth Sensors -- Kinect v2}
+
+Released by Microsoft in late 2013
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/kinect2.jpg}}
+    {\centering Image from \url{wikipedia.org}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Computing Scene Geometry}
+\framesubtitle{Depth Sensors -- Kinect v2}
+
+Works based on the time of flight principle
+\begin{itemize}
+    \item A light pulse is emitted at time $t_0$
+    \item Pulse is reflected and observed at time $t_1$
+    \item $w$ proportional to delay, $t_1-t_0=2w/c$ % c is the speed of light
+\end{itemize}
+
+% Kinect2 seems to use a pulsed/gated design according to http://www.gamasutra.com/blogs/DanielLau/20131127/205820/The_Science_Behind_Kinects_or_Kinect_10_versus_20.php , but I could not find official information
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Computing Scene Geometry}
+\framesubtitle{Depth Sensors -- Kinect v2}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/kinect2-depth.jpg}}
+    {\centering Image from \url{https://www.youtube.com/watch?v=JaOlUa57BWs}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Computing Scene Geometry}
+
+We now have an image encoding $w$ (\emph{depth map})
+\begin{itemize}
+    \item Can be generated from disparity map as shown above
+\end{itemize}
+
+\bigskip
+We can use this information to obtain points in the world $\vw$
+\begin{itemize}
+    \item By inverting the pinhole camera model
+    \item Resulting in a \emph{point cloud}
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Computing Scene Geometry}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/point-cloud.jpg}}
+    {\centering Image from \url{creativeapplications.net}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Summary}
+
+We have covered
+\begin{itemize}
+    \item How the scene geometry and images are related
+    \item Means for estimating point distances $w$
+    \item How scene geometry can be recovered on this basis
+\end{itemize}
+
+\bigskip
+This information enables interesting CV applications
+\begin{itemize}
+    \item Next, we will go over some examples
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{3D Vision Lecture}
+
+Interested in 3D vision?
+\begin{itemize}
+    \item There is an own VO (183.129) and UE (183.130)
+\end{itemize}
 
 \end{frame}
 

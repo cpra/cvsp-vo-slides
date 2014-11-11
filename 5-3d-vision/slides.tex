@@ -471,6 +471,21 @@ Accomplished via graphical models (\eg MRFs) % we always talk about models, whic
 
 \begin{frame}
 \frametitle{Computing Scene Geometry}
+\framesubtitle{Stereo}
+
+Limitations of image-based (passive) stereo
+\begin{itemize}
+    \item No correspondences in regions without texture % we can interpolate of course
+    \item Relies on proper illumination (no dark living rooms) % Kinect ...
+    \item Computational complexity % this can be an issue ... global optimization is quite complex
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Computing Scene Geometry}
 \framesubtitle{Depth Sensors}
 
 Alternatively, we can use sensors that capture $w$ directly

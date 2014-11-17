@@ -122,6 +122,7 @@
 \newcommand{\vz}{\vec{z}}
 \newcommand{\vp}{\vec{p}}
 \newcommand{\vq}{\vec{q}}
+\newcommand{\vn}{\vec{n}}
 
 % bold greek symbols
 \newcommand{\bth}{\boldsymbol{\theta}}
@@ -180,7 +181,7 @@ CV applications utilizing scene geometry (3D data)
 \begin{frame}
 \frametitle{3D Reconstruction}
 
-The obvious thing we can do is generate 3D models
+Construction of accurate 3D models from range data
 \begin{itemize}
 	\item Usually involves combing multiple point clouds % because there are holes due to occlusions / data from point clouds / depth maps / disparity maps ... these are treated as equal because we can map between them ... se previous slide set
 \end{itemize}
@@ -188,9 +189,12 @@ The obvious thing we can do is generate 3D models
 \bigskip
 Accomplished in two steps % these can be alternating, e.g. with kinect fusion
 \begin{itemize}
-	\item Align range data
+	\item Align range data (map to common coordinate system)
 	\item Merge range data in a way that minimizes errors % otherwise we could just concatenate the points
 \end{itemize}
+
+\bigskip
+Often followed by surface reconstruction % many reconstruction methods result in a point cloud, but in many applications we want triangle meshes
 
 \end{frame}
 
@@ -202,8 +206,8 @@ Accomplished in two steps % these can be alternating, e.g. with kinect fusion
 
 Popular method for aligning two point clouds $\{\vr\}$, $\{\vs\}$
 \begin{itemize}
-	\item Goal is to find parameters $\boldsymbol{\psi}$ of some transformation $\trans$
-	\item Usually assuming a rigid transformation % thats a translation + rotation
+	\item Goal is to find parameters $\bth$ of some transformation $\trans$ % note that this again fits our model-based CV approach discussed earlier. we take one cloud as the reference (w) and one as measurements (x), and T(x;theta) is our model that relates these two
+	\item Usually assuming a rigid transformation % thats a translation + rotation, which is what we get when observing the same object from different views
 \end{itemize}
 
 \bigskip
@@ -224,13 +228,13 @@ Popular method for aligning two point clouds $\{\vr\}$, $\{\vs\}$
 Algorithm iterates between
 \begin{itemize}
 	\item Finding point correspondences based on distance, $\{(r_n,s_n)\}_n$ % s_i corresponds to r_j if no their distance is below t and if no other s is closer to r_j
-	\item Finding the $\boldsymbol{\psi}$ that minimizes $\sum_n\lVert\vr_{r_n}-\trans(\vs_{s_n};\boldsymbol{\psi}) \rVert_2^2$ % this denotes the squares l2 norm ... least squares problem, as the solution to the ML estimate assuming constant additive Gaussian noise ... the minimum can be found in closed form if T is linear (like with a rigid transformation) ... but we still need an iterative approach because the correspondences are erroneous
+	\item Finding the $\bth$ that minimizes $\sum_n\lVert\vr_{r_n}-\trans(\vs_{s_n};\bth) \rVert_2^2$ % this denotes the squares l2 norm ... least squares problem, as the solution to the ML estimate assuming constant additive Gaussian noise ... the minimum can be found in closed form if T is linear (like with a rigid transformation) ... but we still need an iterative approach because the correspondences are erroneous
 \end{itemize}
 
 \bigskip
 Converges towards a local minimum
 \begin{itemize}
-	\item Requires good initial estimate of $\boldsymbol{\psi}$
+	\item Requires good initial estimate of $\bth$ (local optimization) % ICP is a typical example of an iterative optimization problem. as such, it is crucial that the initial parameter estimates are close to the global minimum, otherwise the optimization gets stuck in a local minimum. we have discussed this before, and it is nicely visible in the below video.
 \end{itemize}
 
 \bigskip
@@ -238,7 +242,7 @@ Converges towards a local minimum
 	\url{https://www.youtube.com/watch?v=ii2vHBwlmo8}
 \end{center}
 
-% note that ICP always operates on two point clouds. what if we want to align more than two? simply chaining ICP quickly produces bad results because it accumulates errors. but there are some alternatives around ...
+% note that ICP always operates on two point clouds. what if we want to align more than two? simply chaining ICP quickly produces bad results because it accumulates errors. but there are some alternatives, like global optimization or Kinect Fusion's approach (see below)
 
 \end{frame}
 
@@ -268,7 +272,7 @@ Truncated signed distance functions (TSDFs)
 \frametitle{3D Reconstruction}
 \framesubtitle{Range Data Merging -- TSDF Fusion}
 
-Merged data = weighted average over aligned TSDF voxels
+Merged data = weighted average over aligned TSDF voxels % this leads to an optimal combination in a least sqaure sense under some simplified assumptions, see the paper
 \begin{itemize}
 	\item Weights based on \eg object distance, angle
 \end{itemize}
@@ -292,8 +296,8 @@ Temporal fusion of Kinect depth maps
 \bigskip
 Based on the above methods (ICP \& TSDF fusion)
 \begin{itemize}
-	\item But $\{\vr\}$ synthesized from merged model
-	\item Suppresses alignment error accumulation
+	\item But $\{\vr\}$ is synthesized from merged model
+	\item Suppresses alignment error accumulation % see the comment above ... alignment errors propagate
 \end{itemize}
 
 \begin{center}
@@ -326,23 +330,19 @@ Based on the above methods (ICP \& TSDF fusion)
 
 \begin{frame}
 \frametitle{3D Reconstruction}
-\framesubtitle{Application Fields}
+\framesubtitle{Surface Reconstruction}
 
-Cultural heritage\\\medskip
-Virtual and augmented reality\\\medskip
-Architecture\\\medskip
-...
+Reconstruction of surface mesh from point cloud
+\begin{itemize}
+    \item Results in a (locally) watertight 3D model % watertight = object surface is closed, not just a bunch of points in space
+    \item Allows for further processing (e.g.\ texturing)
+\end{itemize}
 
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{3D Reconstruction}
-\framesubtitle{Application Fields}
-
+\bigskip
 \begin{center}
-	[Video] % show cargo video
+    \copyrightbox[b]
+    {\includegraphics[width=6cm]{figures/hip-points-surface.jpg}}
+    {\centering Image from \cite{kazhdan2005}}
 \end{center}
 
 \end{frame}
@@ -350,24 +350,210 @@ Architecture\\\medskip
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Object Detection}
+\frametitle{3D Reconstruction}
+\framesubtitle{Surface Reconstruction}
 
-3D data enables reliable object detection
+Correction of point cloud errors
 \begin{itemize}
-	\item Metric information available
-	\item Invariant to camera parameters % only intrinsics if we don't know the extrinsic parameters though, but we can often auto calibrate to get a sufficient estimate of the extrinsics (as shown below)
+    \item Noise, outliers, alignment errors, missing data
 \end{itemize}
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/point-cloud-errors}}
+    {\centering Image adapted from \cite{berger2014}} % nice paper on current surface reconstruction method
+\end{center}
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Object Detection}
-\framesubtitle{Breaking Assistance via Person Detection}
+\frametitle{3D Reconstruction}
+\framesubtitle{Surface Reconstruction -- Poisson Surface Reconstruction}
 
 \begin{center}
-	\url{https://www.youtube.com/watch?v=oU4XQvxO10k} % the Mercedes also uses radar for this, probably during nighttime? it's also just one example, must manufacturers now have some form of this in their premium models
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/psr-david.jpg}}
+    {\centering Images from \cite{kazhdan2006}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{3D Reconstruction}
+\framesubtitle{Surface Reconstruction -- Poisson Surface Reconstruction}
+
+Define $\chi(\vx)=1$ if $\vx$ inside the object, $0$ otherwise
+\begin{itemize}
+    \item Surface is at $\chi(\cdot)=0.5$
+    \item $\nabla\chi$ equals surface normal near surface, $0$ otherwise
+\end{itemize}
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/psr-indicator.png}} % left: chi, right: nabla chi
+    {\centering Images from Gotsman \& Kazhdan's slides}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{3D Reconstruction}
+\framesubtitle{Surface Reconstruction -- Poisson Surface Reconstruction}
+
+Regard oriented points $\{(\vx,\vn)\}$ as samples from $\nabla\chi$, $\nabla\chi(\vx)=\vn$ % oriented point = point x with normal vector n ... normals must be estimated in a preprocessing step
+\begin{itemize}
+    \item Points define vector field $\mathcal{V}$ that corresponds to $\nabla\chi$ % put simply, V is obtained by applying a smoothing filter to the point cloud
+    \item Sought $\chi$ minimizes $\lVert\nabla\chi-\mathcal{V}\rVert$ % check out the paper if interested in how this is done
+\end{itemize}
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/psr-vector-field.png}} % left: V at point locations, right: nabla chi
+    {\centering Images from Gotsman \& Kazhdan's slides}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{3D Reconstruction}
+\framesubtitle{Surface Reconstruction -- Poisson Surface Reconstruction}
+
+Once $\chi$ is known, the isosurface $\chi(\cdot)=0.5$ can be extracted
+\begin{itemize}
+    \item Using marching cubes, for example
+\end{itemize}
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/marching-cubes.png}}
+    {\centering Images from \url{wikipedia.org}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{3D Reconstruction}
+\framesubtitle{Software -- Point Cloud Library (PCL)}
+
+C++ open-source library for point cloud processing\\\medskip
+Includes implementations of the above methods
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=6cm]{figures/pcl-logo.png}}
+    {\centering Image from \url{pointclouds.org}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{3D Reconstruction}
+\framesubtitle{Application Fields -- Cultural Heritage} % only a small selection of course
+
+Preservation of physical artifacts
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=6cm]{figures/david-model.jpg}} % rendering of a 3d model of Michelangelo's David, obtained using a laser scanner. there are now reconstruction methods that lead to a similar accuracy while using only high resolution images
+    {\centering Image from \cite{levoy2000}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{3D Reconstruction}
+\framesubtitle{Application Fields -- Virtual and Augmented Reality}
+
+Project Tango
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/project-tango.jpg}}
+    {\centering Image from \url{https://www.youtube.com/watch?v=Qe10ExwzCqk}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Person Detection}
+
+3D data enables reliable person detection
+\begin{itemize}
+    \item Robust motion detection
+	\item Distinctive, invariant features % depends on the features of course, but the source data (3D points in world coords) are
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=6.5cm]{figures/person-detection.jpg}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Person Detection}
+\framesubtitle{Motion Detection}
+
+Reliable motion detection via background subtraction
+\begin{itemize}
+    \item Measurements represent object distances
+    \item Not affected by illumination, clothing, shadows % these are major problems with normal intensity or color images. of course, the data might be effected if the sensor that generates the distance measurements is affected, but we assume a reliable depth stream here (from a Kinect, for example)
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=5cm]{figures/fearless-depth.png}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Person Detection}
+\framesubtitle{Features}
+
+Scene geometry allows for distinctive, invariant features
+\begin{itemize}
+    \item Object size, extent, volume, shape, ... % if we know the extrinsics
+\end{itemize}
+
+\bigskip
+More on object detection later
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Person Detection}
+\framesubtitle{Applications -- Breaking Assistance}
+
+\begin{center}
+	\url{https://www.youtube.com/watch?v=oU4XQvxO10k} % the Mercedes also uses radar for this, for longer range and probably during nighttime. it's also just one example, must manufacturers now have some form of this in their premium models
 \end{center}
 
 \begin{center}
@@ -381,8 +567,8 @@ Architecture\\\medskip
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Object Detection}
-\framesubtitle{Interactive Art Installations}
+\frametitle{Person Detection}
+\framesubtitle{Applications -- Interactive Art Installations}
 
 \begin{center}
     \copyrightbox[b]
@@ -395,13 +581,13 @@ Architecture\\\medskip
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Object Detection}
-\framesubtitle{Fall Detection (fearless)}
+\frametitle{Person Detection}
+\framesubtitle{Applications -- Fall Detection (fearless)}
 
 Fall detection system developed at CVL
 \begin{itemize}
 	\item Uses data from a single Kinect sensor
-	\item Runs on an inexpensive single-board computer
+    \item Detects falls by tracking the height of persons
 \end{itemize}
 
 \bigskip
@@ -416,11 +602,11 @@ Fall detection system developed at CVL
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Object Detection}
-\framesubtitle{Fall Detection (fearless)}
+\frametitle{Person Detection}
+\framesubtitle{Applications -- Fall Detection (fearless)}
 
 \begin{center}
-	[Video]
+    \includegraphics[width=8cm]{figures/fearless-screenshot.jpg}
 \end{center}
 
 \end{frame}
@@ -428,73 +614,39 @@ Fall detection system developed at CVL
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Object Detection}
-\framesubtitle{Fall Detection (fearless) -- Motion Detection}
+\frametitle{Person Detection}
+\framesubtitle{Applications -- Entertainment (Kinect Player Pose Estimation)}
 
-Motion detection via background subtraction
-\begin{itemize}
-	\item Robust because not affected by illumination, clothing
-\end{itemize}
+\begin{center}
+    \url{https://www.youtube.com/watch?v=p2qlHoxPioM}
+\end{center}
 
-% \bigskip
-% Moving parts projected to point cloud in world coordinates
-% \begin{itemize}
-% 	\item Extrinsics $\boldsymbol{\Omega}$, $\boldsymbol{\tau}$ estimated % see below
-% \end{itemize}
+\begin{center}
+    \includegraphics[width=8cm]{figures/kinect-promo.jpg}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+
+Let's take a look at how this works\\\medskip
+Assume we have already detected the person
 
 \bigskip
 \begin{center}
-\includegraphics[width=5cm]{figures/fearless-depth.png}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/kinect-pose.jpg}}
+    {\centering Image from \cite{shotton2011}}
 \end{center}
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}
-\frametitle{Object Detection}
-\framesubtitle{Fall Detection (fearless) -- Person Detection}
-
-Moving areas projected to point cloud in world coordinates\\\medskip
-Person classification based on geometry % on a per-region basis using features like like height, occupied area, volume ... details are not important, this is just an example of how 3D person detection can be accomplished
-
-\bigskip
-\begin{center}
-\includegraphics[width=5cm]{figures/fearless-pc.png}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Object Detection}
-\framesubtitle{Fall Detection (fearless) -- Person Detection}
-
-Fall detection based on temporal height change\\\medskip
-Furniture detection to reduce false alarm rate
-
-\bigskip
-\begin{center}
-\includegraphics[width=6.5cm]{figures/reclaim-furniture-detection.jpg}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{To Be Continued}
-
-\begin{center}
-	More next time!
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
+\begin{frame}[allowframebreaks=0.9]
 \frametitle{Bibliography}
 
 \printbibliography

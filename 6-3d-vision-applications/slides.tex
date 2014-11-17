@@ -234,7 +234,7 @@ Algorithm iterates between
 \bigskip
 Converges towards a local minimum
 \begin{itemize}
-	\item Requires good initial estimate of $\bth$ (local optimization) % ICP is a typical example of an iterative optimization problem. as such, it is crucial that the initial parameter estimates are close to the global minimum, otherwise the optimization gets stuck in a local minimum. we have discussed this before, and it is nicely visible in the below video.
+	\item Requires good initial estimate of $\bth$ % ICP is a typical example of an iterative optimization problem. as such, it is crucial that the initial parameter estimates are close to the global minimum, otherwise the optimization gets stuck in a local minimum. we have discussed this before, and it is nicely visible in the below video.
 \end{itemize}
 
 \bigskip
@@ -362,7 +362,7 @@ Correction of point cloud errors
 \begin{center}
     \copyrightbox[b]
     {\includegraphics[width=7cm]{figures/point-cloud-errors}}
-    {\centering Image adapted from \cite{berger2014}} % nice paper on current surface reconstruction method
+    {\centering Image adapted from \cite{berger2014}} % nice paper on current surface reconstruction methods
 \end{center}
 
 \end{frame}
@@ -592,21 +592,7 @@ Fall detection system developed at CVL
 
 \bigskip
 \begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=3cm]{figures/fearless.png}}
-    {\centering Image from \url{fearless-project.eu}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Person Detection}
-\framesubtitle{Applications -- Fall Detection (fearless)}
-
-\begin{center}
-    \includegraphics[width=8cm]{figures/fearless-screenshot.jpg}
+    \includegraphics[width=6cm]{figures/fearless-screenshot.jpg}
 \end{center}
 
 \end{frame}
@@ -633,7 +619,9 @@ Fall detection system developed at CVL
 \frametitle{Kinect Player Pose Estimation}
 
 Let's take a look at how this works\\\medskip
-Assume we have already detected the person
+Assuming we have already detected the person
+
+% this is Kinect v1's initial method, but Kinect v2 (and maybe later versions of v1 as well) work differently
 
 \bigskip
 \begin{center}
@@ -641,6 +629,109 @@ Assume we have already detected the person
     {\includegraphics[width=8cm]{figures/kinect-pose.jpg}}
     {\centering Image from \cite{shotton2011}}
 \end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Steps}
+
+Estimate body part of each pixel independently\\\medskip
+Perform clustering to obtain joint position proposals\\\medskip
+Fit skeleton model to joint proposals
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/kinect-pose.jpg}}
+    {\centering Image from \cite{shotton2011}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Pixel Classification}
+
+For each pixel $\vx$ with depth $d(\vx)$ compute $\Pr(w|\vx)$ % depth as stored in depth map at pixel x, which corresponds to w in the previous slide set (i.e. not the Euclidean distance)
+\begin{itemize}
+     \item With $w$ representing the body part, $w\in\{0,\dots,30\}$ % these are shown below. note that the body side is important
+     \item Note that this is a discriminative model % i.e. we infer a probability mass, not just a single hard label. refer to the models vs. algorithms slides
+\end{itemize} 
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=5cm]{figures/kinect-pose-labels.jpg}}
+    {\centering Image from \cite{shotton2011}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Pixel Classification}
+
+Classification using simple depth offset features $f_{\bth}$,
+\[
+    f_{\bth=(\vu,\vv)}(\vx)=d\left(\vx+\frac{\vu}{d(\vx)}\right)-d\left(\vx+\frac{\vv}{d(\vx)}\right)
+\] % division by d(x) makes these features distance-invariant ... the offset adapts to d. also, these can be computed very quickly, which is required for real-time performance
+
+\smallskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/kinect-pose-features.jpg}}
+    {\centering Image adapted from \cite{shotton2011}} % here the yellow x denotes the current pixel and the two red pixels correspond to the locations used for offset computation. both features cause very different values in both images
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Pixel Classification}
+
+In isolation, one such feature $f_{\bth_1}$ is weak\\\medskip
+But a strong classifier can be built by combining several features\\\medskip 
+Method uses a forest of $T$ \emph{randomized decision trees} % this is only one example (but a powerful one) of an ensemble method, see Bishops book for more information
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/kinect-pose-forest.png}}
+    {\centering Image adapted from \cite{shotton2011}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Pixel Classification -- Random Forests}
+
+Each tree $t$ consist of split and leaf nodes\\\medskip
+Each split node consists of a feature $f_{\bth}$ and a threshold $\tau$
+\begin{itemize}
+    \item $\vx$ branches down based on $f_{\bth_k}>\tau_k$
+    \item Until a leaf node is reached, which stores $\Pr_t(w|\vx)$
+\end{itemize}
+
+\bigskip
+Tree trained from training samples $(\vx,w)$ % extracted from different training images for each tree / for more information on how training works see "Randomized Trees for Real-Time Keypoint Recognition" by Lepetit et al.
+\begin{itemize}
+    \item $\bth_k,\tau_k$ selected randomly (hence random tree)
+\end{itemize}
+
+\bigskip
+All trees contribute to result, $P(w|\vx)=\sum_{t=1}^T \Pr_t(w|\vx)$
 
 \end{frame}
 

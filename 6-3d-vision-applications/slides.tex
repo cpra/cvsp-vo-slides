@@ -698,9 +698,51 @@ Classification using simple depth offset features $f_{\bth}$,
 \frametitle{Kinect Player Pose Estimation}
 \framesubtitle{Pixel Classification}
 
-In isolation, one such feature $f_{\bth_1}$ is weak\\\medskip
-But a strong classifier can be built by combining several features\\\medskip 
-Method uses a forest of $T$ \emph{randomized decision trees} % this is only one example (but a powerful one) of an ensemble method, see Bishops book for more information
+One such feature is weak\\\medskip
+But a strong classifier can be built by combining them\\\medskip 
+Implemented using a \emph{random forest} % this is an example (a powerful one) of an ensemble method, see Bishop's book for more information
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/kinect-pose-forest.png}} % Kinect seems to use 3 trees of depth of up to 20
+    {\centering Image adapted from \cite{shotton2011}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Pixel Classification -- Random Forests}
+
+Random forest consists of $T$ randomized decision trees
+
+\bigskip
+Each tree $t$ consist of split and leaf nodes\\\medskip
+Each split node consists of a feature $f_{\bth}$ and a threshold $\tau$
+\begin{itemize}
+    \item $\vx$ branches down based on $f_{\bth_k}>\tau_k$
+    \item Until a leaf node is reached, which stores $\Pr_t(w|\vx)$
+\end{itemize}
+
+\bigskip
+Tree trained from training samples $(\vx,w)$ % extracted from different training images for each tree / for more information on how training works see "Randomized Trees for Real-Time Keypoint Recognition" by Lepetit et al.
+\begin{itemize}
+    \item Samples differ between trees
+    \item $\bth_k,\tau_k$ selected randomly (hence random tree) % more precisely, a set of features {theta1,...thetax} is generated randomly, and the best thetak are selected from this set (best feature on top, and so on)
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Pixel Classification -- Random Forests}
+
+All trees contribute to the result, $P(w|\vx)=\sum_{t=1}^T \Pr_t(w|\vx)$
 
 \bigskip
 \begin{center}
@@ -715,29 +757,106 @@ Method uses a forest of $T$ \emph{randomized decision trees} % this is only one 
 
 \begin{frame}
 \frametitle{Kinect Player Pose Estimation}
-\framesubtitle{Pixel Classification -- Random Forests}
+\framesubtitle{Joint Proposals}
 
-Each tree $t$ consist of split and leaf nodes\\\medskip
-Each split node consists of a feature $f_{\bth}$ and a threshold $\tau$
+Project classified pixels to 3D\\\medskip
+Perform clustering for each label $w$ using mean-shift % all points with a probability wk > t are starting points for position proposal of joint k (i.e. multiple proposals are possible). proposals with a small density after convergence are discarded
 \begin{itemize}
-    \item $\vx$ branches down based on $f_{\bth_k}>\tau_k$
-    \item Until a leaf node is reached, which stores $\Pr_t(w|\vx)$
+    \item \url{https://www.youtube.com/watch?v=kmaQAsotT9s}
 \end{itemize}
 
 \bigskip
-Tree trained from training samples $(\vx,w)$ % extracted from different training images for each tree / for more information on how training works see "Randomized Trees for Real-Time Keypoint Recognition" by Lepetit et al.
-\begin{itemize}
-    \item $\bth_k,\tau_k$ selected randomly (hence random tree)
-\end{itemize}
-
-\bigskip
-All trees contribute to result, $P(w|\vx)=\sum_{t=1}^T \Pr_t(w|\vx)$
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=6cm]{figures/kinect-pose-modes.jpg}}
+    {\centering Image adapted from \cite{shotton2011}}
+\end{center}
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}[allowframebreaks=0.9]
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Skeleton Fitting}
+
+Results in $n_w$ joint position proposals per body part $w$\\\medskip % Kinect produces less joints than that because it treats some body parts as equal (e.g. all head parts) when computing joint proposals
+Goal is to find best joint configuration\\\medskip
+Can be accomplished using a constellation model, for example % not sure how the Kinect does it, did not find accurate information
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=4cm]{figures/constellation-model.png}} % this shows a face, but it applies to the human skeleton as well, of course. also, the human skeleton has a tree-like shape, which allows fitting such models using dynamic programming
+    {\centering Image from \cite{fischler1973}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect Player Pose Estimation}
+\framesubtitle{Results}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/kinect-pose-video.jpg}}
+    {\centering Image from \url{https://www.youtube.com/watch?v=YTBvjLGDluY}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Kinect SDK}
+
+Official SDK for Kinect v1 and v2 \\\medskip
+Provides access to sensor streams, skeleton data, and more\\\medskip
+Available at \url{http://www.microsoft.com/en-us/kinectforwindows/}
+
+\bigskip
+Alternatives for non-windows platforms
+\begin{itemize}
+    \item OpenNI2 (\url{https://github.com/occipital/openni2}) % for Kinect v1
+    \item libfreenect2 (\url{https://github.com/OpenKinect/libfreenect2}) % for Kinect v2
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Summary}
+
+Knowledge of scene geometry enables powerful CV applications
+
+\bigskip
+We have covered a selection
+\begin{itemize}
+    \item 3D reconstruction for virtual reality
+    \item Person detection for breaking assistance
+    \item Human pose estimation for gaming
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{3D Vision Lecture}
+
+Interested in 3D vision?
+\begin{itemize}
+    \item There is an own VO (183.129) and UE (183.130)
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[allowframebreaks=0.8]
 \frametitle{Bibliography}
 
 \printbibliography

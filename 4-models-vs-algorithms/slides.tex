@@ -357,7 +357,7 @@ Rigid motion between point sets* & ICP \\ \bottomrule
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}[fragile]
+\begin{frame}
 \frametitle{Inference}
 
 In the example case we have modeled $\Pr(\vx|\vw)$ % this is called the likelihood function
@@ -389,7 +389,7 @@ Assume $x=100, \mu=95, \sigma=2$ % for the corresponding pixel of course
 In this case, we obtain
 \begin{itemize}
     \item $\Pr(w=0)=\Pr(w=1)=0.5$
-    \item $\Pr(x=100|w=0)=\Norm_{100}(90,2^2)\approx0.009$
+    \item $\Pr(x=100|w=0)=\Norm_{100}(95,2^2)\approx0.009$
     \item $\Pr(x=100)=\sum_{i\in\{0,1\}}\Pr(x=100|w=i)\Pr(w=i)\approx .007$
     \item $\Pr(w|x=100)\approx(0.69,0.31)$
 \end{itemize}
@@ -465,7 +465,7 @@ Iterative methods
 
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=5cm]{figures/optim-1d.pdf}} % notation is slightly different, but should be clear
+    {\includegraphics[width=5cm]{figures/optim-1d.pdf}}
     {\centering Image adapted from \cite{prince12}}
 \end{center}
 

@@ -59,6 +59,29 @@
 % plots (part of texlive-pictures)
 \usepackage{pgfplots}
 
+% process diagrams (part of texlive-pictures)
+\usepackage{smartdiagram}
+
+% diagram style
+
+\smartdiagramset{norm/.style={
+     sequence item border color=gray!30!black,
+     sequence item border size=1.5\pgflinewidth,
+     sequence item font size=\footnotesize,
+  }
+}
+
+\smartdiagramset{transp/.style={
+     sequence item border color=gray!70!black,
+     sequence item border size=1.5\pgflinewidth,
+     sequence item font size=\footnotesize,
+     sequence item fill opacity=0.5,
+     sequence item text opacity=0.5
+  }
+}
+
+\smartdiagramset{norm}
+
 % -----------------------------------------------------------------------------
 
 % specify PDF metadata
@@ -150,7 +173,15 @@
 \frametitle{Topics}
 
 Taxonomy of recognition problems\\\medskip
-Selection of popular applications involving object recognition
+Detection of specific rigid objects\\\medskip
+Efficient face detection\\\medskip
+Image classification
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=6cm]{figures/local-feature-matching.jpg}}
+    {\centering Image from \cite{grauman2011}}
+\end{center}
 
 \end{frame}
 
@@ -158,22 +189,28 @@ Selection of popular applications involving object recognition
 
 \begin{frame}
 \frametitle{Taxonomy of Object Recognition}
-\framesubtitle{Instance vs.\ category recognition}
 
-Instance : my face, the Eiffel tower\\\medskip
-Category : faces, buildings, people
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Taxonomy of Object Recognition}
-\framesubtitle{Levels of Recognition -- Classification}
-
-Predict class of main object in image
+Instance vs.\ category recognition
+\begin{itemize}
+    \item Instance : my face, the Eiffel tower
+    \item Category : faces, buildings, people
+\end{itemize}
 
 \bigskip
+Classification vs.\ detection
+\begin{itemize}
+    \item Classification : predict class of main object in image
+    \item Detection : multiple objects, possibly of different class % like "detect all faces in image"
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Taxonomy of Object Recognition}
+\framesubtitle{Classification}
+
 \begin{center}
     \copyrightbox[b]
     {\includegraphics[width=8cm]{figures/classification-problem.jpg}}
@@ -186,30 +223,8 @@ Predict class of main object in image
 
 \begin{frame}
 \frametitle{Taxonomy of Object Recognition}
-\framesubtitle{Levels of Recognition -- Localization}
+\framesubtitle{Detection}
 
-Predict class and location(s) of main object in image
-
-\bigskip
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=8cm]{figures/localization-problem.jpg}}
-    {\centering Image from Pierre Sermanet's slides}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Taxonomy of Object Recognition}
-\framesubtitle{Levels of Recognition -- Detection}
-
-% note that often localization and detection are not separated. for example, face detection is a common term, but in this context it would be localization because there is only one relevant class
-
-Any number of different objects
-
-\bigskip
 \begin{center}
     \copyrightbox[b]
     {\includegraphics[width=8cm]{figures/detection-problem.jpg}}
@@ -239,11 +254,11 @@ Instances of same category can look very differently
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects} % this is obviously an instance recognition problem
 
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=7cm]{figures/panorama-stitching.jpg}}
+    {\includegraphics[width=7cm]{figures/panorama-stitching.jpg}} % stitching is not the typical example, but it can be regarded as one
     {\centering Image adapted from \cite{brown2007}}
 \end{center}
 
@@ -252,19 +267,16 @@ Instances of same category can look very differently
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 
-Assume that objects are rigid (nonrigid later) % this is important, because it allows us to perform geometric verification
-
-\bigskip
 Often accomplished via \emph{local feature matching}
 
 \bigskip
-Given an image of the instance and a search image
+Given an image of the object and a search image
 \begin{itemize}
     \item Compute local features in both images
     \item Match features between images to find correspondences
-    \item Perform geometric verification
+    \item Perform geometric verification % this is possible due to rigidity
 \end{itemize}
 
 \end{frame}
@@ -272,7 +284,7 @@ Given an image of the instance and a search image
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 \framesubtitle{Local Feature Representations}
 
 Local features form a sparse object representation
@@ -293,20 +305,22 @@ Local features form a sparse object representation
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 \framesubtitle{Local Feature Representations}
 
 Many different feature extractors available
 \begin{itemize}
     \item SIFT, SURF, BRISK, FREAK, ... % we have covered SIFT shortly in a previous lecture. no more coverage here on the other ones, but they are all quite similar
+    \item OpenCV includes implementations
 \end{itemize}
 
 \bigskip
-Notes on feature extractor selection
+Guidelines on feature selection
 \begin{itemize}
     \item Features should be invariant to expected transformations % like rotation, scale, affine transforms
-    \item But not to other transformations % this ensures that the features are as repeatable as possible
+    \item And only to these transformations
     \item Extraction and matching speeds differ % not a problem if object should be searched for in 5 images, but what if in 100.000 images?
+    \item Performance often quite similar, but better test
 \end{itemize}
 
 \end{frame}
@@ -314,7 +328,7 @@ Notes on feature extractor selection
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 \framesubtitle{Feature Matching}
 
 Features are $n$-dimensional vectors
@@ -335,7 +349,7 @@ Popular matching strategy
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 \framesubtitle{Geometric Verification}
 
 Assume that the object in question is planar
@@ -356,7 +370,7 @@ Assume that the object in question is planar
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 \framesubtitle{Geometric Verification}
 
 Relation allows for detecting erroneous correspondences
@@ -376,10 +390,10 @@ Verification also possible for nonplanar scenes
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 \framesubtitle{Applications -- Object Detection}
 
-Detection and pose estimation of rigid objects
+Detection and 2D pose estimation
 
 \bigskip
 \begin{center}
@@ -393,7 +407,7 @@ Detection and pose estimation of rigid objects
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 \framesubtitle{Applications -- Object Detection}
 
 Industrial applications like PCB recycling
@@ -408,7 +422,7 @@ Industrial applications like PCB recycling
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Instance Recognition}
+\frametitle{Detecting Specific Rigid Objects}
 \framesubtitle{Applications -- Panorama Stitching}
 
 \begin{center}
@@ -422,7 +436,7 @@ Industrial applications like PCB recycling
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Face Localization}
+\frametitle{Efficient Face Detection} % this is a category recognition problem
 
 \begin{center}
     \copyrightbox[b]
@@ -435,9 +449,9 @@ Industrial applications like PCB recycling
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Face Localization}
+\frametitle{Efficient Face Detection}
 
-Many applications, such as
+Face detection has many applications, such as
 \begin{itemize}
     \item Smart cameras (autofocus on faces)
     \item Security (preprocessing step to face recognition)
@@ -455,8 +469,7 @@ We focus on the popular method from [\cite{viola2001}]
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Face Localization}
-\framesubtitle{\cite{viola2001} -- Approach}
+\frametitle{Efficient Face Detection}
 
 Sliding window approach % we don't know where the faces might be, so we just scan over the whole image. note that the window size depends on the expected size of the faces, and as such is not scale invariant (but we could repeat the test with different scales)
 \begin{itemize}
@@ -482,13 +495,12 @@ Sliding window approach % we don't know where the faces might be, so we just sca
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Face Localization}
-\framesubtitle{\cite{viola2001} -- Features}
+\frametitle{Efficient Face Detection}
 
 Simple features -- difference $d$ in rectangular subwindow of $\vx$
 \begin{itemize}
     \item Can be computed in constant time using integral images
-    \item Limited number of such features $\{f_t\}_{t=1}^T$
+    \item Limited number of such features, $\{f_t\}_{t=1}^T$ % for a given window size
 \end{itemize}
 
 \bigskip
@@ -503,14 +515,13 @@ Simple features -- difference $d$ in rectangular subwindow of $\vx$
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Face Localization}
-\framesubtitle{\cite{viola2001} -- Classifier}
+\frametitle{Efficient Face Detection}
 
-Classification using a cascading classifier
+Classification using a \emph{boosted cascade}
 \begin{itemize}
-    \item Cascade of $K\leq T$ weak but fast classifiers $c_k=f_k>t_k$
+    \item Cascade of $K\leq T$ weak but fast classifiers $c_k=f_k>t_k$ % K is something we can define. around 6k in the original paper
     \item Early rejection of non-face windows for speed % we just abort as soon as the patch is not classified as a face
-    \item Final classifier is $C(\vx)=\text{sign}(w_0+\sum_k w_kc_k)$ % w are some learned weights
+    \item Final classifier is $C(\vx)=\text{sign}(\theta_0+\sum_k \theta_k c_k)$ % theta are some learned weights
 \end{itemize}
 
 \medskip
@@ -525,15 +536,14 @@ Classification using a cascading classifier
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Face Localization}
-\framesubtitle{\cite{viola2001} -- Classifier}
+\frametitle{Efficient Face Detection}
 
-Subset of $K$ classifiers, order, and weights $w$ are learned
+Subset of $K$ best classifiers, their order, and $\bth$ are learned
 
 \bigskip
-Accomplished via \emph{boosting} -- for each $k=1\cdots K$
+Via \emph{boosting} -- for each $k=1\cdots K$
 \begin{itemize}
-    \item Find best classifier according to training set, set as $c_k$ % this is the classifier that, if added to the current C(x), leads to the biggest reduction in error
+    \item Find best classifier according to training set, add to $C$ % this is the classifier that, if added to the current C(x), leads to the biggest reduction in error
     \item Raise weights of samples misclassified by current $C$
 \end{itemize}
 
@@ -543,6 +553,117 @@ Accomplished via \emph{boosting} -- for each $k=1\cdots K$
     {\includegraphics[width=10cm]{figures/boosting.pdf}} % see Szeliski's book for a good explanation
     {\centering Image from \cite{szeliski2010}}
 \end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Classification}
+
+Goal is to predict the class of the main object in an image\\\medskip
+We consider methods based on visual words
+
+\medskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/visual-words.jpg}}
+    {\centering Image from \cite{prince12}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Classification}
+
+Idea is to represent an image as a collection of \emph{visual words} % this comes from document retrieval - a text consists of words, an image of visual words
+\begin{itemize}
+    \item Images can be compared based on visual word distribution
+\end{itemize}
+
+\medskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/visual-words.jpg}}
+    {\centering Image from \cite{prince12}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Classification}
+
+Visual words are learned from an image collection
+\begin{itemize}
+    \item Compute local features for all images
+    \item Cluster these vectors into $k$ clusters using $k$-means
+    \item $k$ cluster means represent visual words
+\end{itemize}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/visual-word-construction.jpg}}
+    {\centering Image from \cite{grauman2011}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Classification}
+
+Visual word distribution $\vx\in\RR^k$ obtained by
+\begin{itemize}
+    \item Computing local features for current image
+    \item Assigning each feature to closest visual word
+    \item Summing up the assignment counts for each visual word
+\end{itemize}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/visual-word-generation.jpg}}
+    {\centering Image from \cite{grauman2011}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Classification}
+
+Prediction of class $w$ from $\vx$ using e.g.\ SVM % can use anything here, but SVMs are popular in this context
+\begin{itemize}
+    \item Classifier learned using training samples $\{(\vx,w)\}$
+\end{itemize}
+
+\bigskip
+\begin{center}
+\smartdiagram[sequence diagram]{Image,Visual Words,SVM}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Classification}
+
+The above approach is called \emph{bag of words} model
+\begin{itemize}
+    \item Many improvements to this methods exist
+\end{itemize}
+
+\bigskip
+They can work well, but are not state of the art
+\begin{itemize}
+    \item More on this in the next slide set
+\end{itemize}
 
 \end{frame}
 

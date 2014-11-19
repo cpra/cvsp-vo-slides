@@ -731,7 +731,7 @@ Each split node consists of a feature $f_{\bth}$ and a threshold $\tau$
 Tree trained from training samples $(\vx,w)$ % extracted from different training images for each tree / for more information on how training works see "Randomized Trees for Real-Time Keypoint Recognition" by Lepetit et al.
 \begin{itemize}
     \item Samples differ between trees
-    \item $\bth_k,\tau_k$ selected randomly (hence random tree) % more precisely, a set of features {theta1,...thetax} is generated randomly, and the best thetak are selected from this set (best feature on top, and so on)
+    \item $\bth_k,\tau_k$ selected from random subset % a set of features {theta1,...thetax} is generated randomly (hence random tree), and the best thetak are selected from this set (best feature on top, and so on). this reduces correlation between trees, because they use different features
 \end{itemize}
 
 \end{frame}
@@ -742,7 +742,10 @@ Tree trained from training samples $(\vx,w)$ % extracted from different training
 \frametitle{Kinect Player Pose Estimation}
 \framesubtitle{Pixel Classification -- Random Forests}
 
-All trees contribute to the result, $P(w|\vx)=\sum_{t=1}^T \Pr_t(w|\vx)$
+All trees contribute to the result, $P(w|\vx)=\sfrac{1}{T}\sum_{t=1}^T \Pr_t(w|\vx)$
+\begin{itemize}
+    \item This training \& inference strategy is called \emph{bagging}
+\end{itemize}
 
 \bigskip
 \begin{center}
@@ -782,7 +785,7 @@ Perform clustering for each label $w$ using mean-shift % all points with a proba
 
 Results in $n_w$ joint position proposals per body part $w$\\\medskip % Kinect produces less joints than that because it treats some body parts as equal (e.g. all head parts) when computing joint proposals
 Goal is to find best joint configuration\\\medskip
-Can be accomplished using a constellation model, for example % not sure how the Kinect does it, did not find accurate information
+Can be accomplished using a constellation model, for example % not sure how the Kinect does it, could not find accurate information
 
 \bigskip
 \begin{center}

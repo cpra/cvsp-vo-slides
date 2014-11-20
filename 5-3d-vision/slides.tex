@@ -22,7 +22,7 @@
 %   \begin{minted}{python}
 %   codeb
 %   \end{minted}
-% \usepackage{minted}
+\usepackage{minted}
 
 % better looking tables
 % usage:
@@ -469,6 +469,29 @@ Accomplished via graphical models (\eg MRFs) % we always talk about models, whic
 
 % -----------------------------------------------------------------------------
 
+\begin{frame}[fragile]
+\frametitle{Computing Scene Geometry}
+\framesubtitle{Stereo}
+
+Stereo matching in Python using OpenCV % code is from the example that comes with OpenCV, check it out for details
+
+\medskip
+\begin{minted}{python}
+imgL = cv2.pyrDown(cv2.imread('left.jpg'))
+imgR = cv2.pyrDown(cv2.imread('right.jpg'))
+stereo = cv2.StereoSGBM(...) # args depend on images
+disparity = stereo.compute(imgL, imgR)
+\end{minted}
+
+\medskip
+\begin{center}
+\includegraphics[width=8cm]{figures/opencv-stereo.jpg}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
 \begin{frame}
 \frametitle{Computing Scene Geometry}
 \framesubtitle{Stereo}
@@ -604,6 +627,48 @@ Works based on the time of flight principle
     {\includegraphics[width=7cm]{figures/kinect2-depth.jpg}}
     {\centering Image from \url{https://www.youtube.com/watch?v=JaOlUa57BWs}}
 \end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Computing Scene Geometry}
+\framesubtitle{Depth Sensors -- Kinect}
+
+There are several libraries for accessing Kinect data
+\begin{itemize}
+    \item Kinect SDK (\url{http://microsoft.com/en-us/kinectforwindows/}) % v1,v2, windows only
+    \item OpenNI2 (\url{https://github.com/occipital/openni2}) % v1
+    \item libfreenect2 (\url{https://github.com/OpenKinect/libfreenect2}) % v2
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Computing Scene Geometry}
+\framesubtitle{Depth Sensors -- Kinect}
+
+Access depth maps using OpenNI2 \& OpenCV
+
+\bigskip
+\footnotesize
+\begin{minted}{cpp}
+    using namespace openni;
+
+    OpenNI::initialize();
+    Device dev; dev.open(ANY_DEVICE); // open any connected sensor
+    VideoStream s; s.create(dev, SENSOR_DEPTH); s.start();
+
+    VideoFrameRef fr; s.readFrame(&fr); // read frame
+
+    // convert for use with OpenCV
+    cv::Mat_<ushort> f(fr.getHeight(), fr.getWidth());
+    const DepthPixel *px = (const DepthPixel*) fr.getData();
+    std::memcpy(f.data, px, fr.getHeight() * fr.getWidth() * sizeof(DepthPixel));
+\end{minted}
 
 \end{frame}
 

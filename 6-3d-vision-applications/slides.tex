@@ -22,7 +22,7 @@
 %   \begin{minted}{python}
 %   codeb
 %   \end{minted}
-% \usepackage{minted}
+\usepackage{minted}
 
 % better looking tables
 % usage:
@@ -183,7 +183,7 @@ CV applications utilizing scene geometry (3D data)
 
 Construction of accurate 3D models from range data
 \begin{itemize}
-	\item Usually involves combing multiple point clouds % because there are holes due to occlusions / data from point clouds / depth maps / disparity maps ... these are treated as equal because we can map between them ... se previous slide set
+	\item Usually involves combing multiple point clouds % because there are holes due to occlusions / data from point clouds / depth maps / disparity maps ... these are treated as equal because we can map between them ... see previous slide set
 \end{itemize}
 
 \bigskip
@@ -228,7 +228,7 @@ Popular method for aligning two point clouds $\{\vr\}$, $\{\vs\}$
 Algorithm iterates between
 \begin{itemize}
 	\item Finding point correspondences based on distance, $\{(r_n,s_n)\}_n$ % s_i corresponds to r_j if no their distance is below t and if no other s is closer to r_j
-	\item Finding the $\bth$ that minimizes $\sum_n\lVert\vr_{r_n}-\trans(\vs_{s_n};\bth) \rVert_2^2$ % this denotes the squares l2 norm ... least squares problem, as the solution to the ML estimate assuming constant additive Gaussian noise ... the minimum can be found in closed form if T is linear (like with a rigid transformation) ... but we still need an iterative approach because the correspondences are erroneous
+	\item Finding the $\bth$ that minimizes $\sum_n\lVert\vr_{r_n}-\trans(\vs_{s_n};\bth) \rVert_2^2$ % this denotes the squared l2 norm ... least squares problem, as the solution to the ML estimate assuming constant additive Gaussian noise ... the minimum can be found in closed form if T is linear (like with a rigid transformation) ... but we still need an iterative approach because the correspondences are erroneous
 \end{itemize}
 
 \bigskip
@@ -431,7 +431,7 @@ Regard oriented points $\{(\vx,\vn)\}$ as samples from $\nabla\chi$, $\nabla\chi
 
 Once $\chi$ is known, the isosurface $\chi(\cdot)=0.5$ can be extracted
 \begin{itemize}
-    \item Using marching cubes, for example
+    \item Using marching cubes, for example % we define a voxel grid with some resolution and then loop through it voxel by voxel. at each voxel we check the neighborhood for what of the below conditions apply using simple in/out tests, and create triangles accordingly
 \end{itemize}
 
 \bigskip
@@ -463,6 +463,29 @@ Includes implementations of the above methods
 
 % -----------------------------------------------------------------------------
 
+\begin{frame}[fragile]
+\frametitle{3D Reconstruction}
+\framesubtitle{Software -- Point Cloud Library (PCL)}
+
+Example : align two point clouds using ICP
+
+\bigskip
+\begin{minted}{cpp}
+typedef pcl::PointXYZ Pt; // a point
+typedef pcl::PointCloud<Pt>::Ptr Pc; // a point cloud
+
+// assume we have two clouds r, s (above notation)
+pcl::IterativeClosestPoint<Pt, Pt> icp;
+icp.setInputSource(s);
+icp.setInputTarget(r);
+icp.align(r, theta); // theta = initial estimate
+theta = icp.getFinalTransformation(); // final estimate
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
 \begin{frame}
 \frametitle{3D Reconstruction}
 \framesubtitle{Application Fields -- Cultural Heritage} % only a small selection of course
@@ -472,7 +495,7 @@ Preservation of physical artifacts
 \bigskip
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=6cm]{figures/david-model.jpg}} % rendering of a 3d model of Michelangelo's David, obtained using a laser scanner. there are now reconstruction methods that lead to a similar accuracy while using only high resolution images
+    {\includegraphics[width=7cm]{figures/david-model.jpg}} % rendering of a 3d model of Michelangelo's David, obtained using a laser scanner. there are now reconstruction methods that lead to a similar accuracy while using only high resolution images
     {\centering Image from \cite{levoy2000}}
 \end{center}
 
@@ -507,7 +530,7 @@ Project Tango
 \end{itemize}
 
 \begin{center}
-\includegraphics[width=6.5cm]{figures/person-detection.jpg}
+\includegraphics[width=6cm]{figures/person-detection.jpg}
 \end{center}
 
 \end{frame}
@@ -520,12 +543,12 @@ Project Tango
 
 Reliable motion detection via background subtraction
 \begin{itemize}
-    \item Measurements represent object distances
+    \item Measurements represent object distances % so what we measure is intuitive. for example, foreground must be closer than background
     \item Not affected by illumination, clothing, shadows % these are major problems with normal intensity or color images. of course, the data might be effected if the sensor that generates the distance measurements is affected, but we assume a reliable depth stream here (from a Kinect, for example)
 \end{itemize}
 
 \begin{center}
-\includegraphics[width=5cm]{figures/fearless-depth.png}
+\includegraphics[width=6cm]{figures/fearless-depth.jpg}
 \end{center}
 
 \end{frame}
@@ -538,7 +561,7 @@ Reliable motion detection via background subtraction
 
 Scene geometry allows for distinctive, invariant features
 \begin{itemize}
-    \item Object size, extent, volume, shape, ... % if we know the extrinsics
+    \item Object size, extent, volume, shape, ... % some invariant only if we know the extrinsics (like height)
 \end{itemize}
 
 \bigskip
@@ -553,7 +576,7 @@ More on object detection later
 \framesubtitle{Applications -- Breaking Assistance}
 
 \begin{center}
-	\url{https://www.youtube.com/watch?v=oU4XQvxO10k} % the Mercedes also uses radar for this, for longer range and probably during nighttime. it's also just one example, must manufacturers now have some form of this in their premium models
+	\url{https://www.youtube.com/watch?v=oU4XQvxO10k} % the Mercedes also uses radar for this, for longer range and probably during nighttime. it's also just one example, most manufacturers now have some form of this in their premium models
 \end{center}
 
 \begin{center}
@@ -590,7 +613,6 @@ Fall detection system developed at CVL
     \item Detects falls by tracking the height of persons
 \end{itemize}
 
-\bigskip
 \begin{center}
     \includegraphics[width=6cm]{figures/fearless-screenshot.jpg}
 \end{center}
@@ -608,7 +630,7 @@ Fall detection system developed at CVL
 \end{center}
 
 \begin{center}
-    \includegraphics[width=8cm]{figures/kinect-promo.jpg}
+    \includegraphics[width=7cm]{figures/kinect-promo.jpg}
 \end{center}
 
 \end{frame}
@@ -657,7 +679,7 @@ Fit skeleton model to joint proposals
 \frametitle{Kinect Player Pose Estimation}
 \framesubtitle{Pixel Classification}
 
-For each pixel $\vx$ with depth $d(\vx)$ compute $\Pr(w|\vx)$ % depth as stored in depth map at pixel x, which corresponds to w in the previous slide set (i.e. not the Euclidean distance)
+For each pixel $\vx$ with depth $d(\vx)$ compute $\Pr(w|\vx)$ % d(x) = depth as stored in depth map at pixel x, which corresponds to w in the previous slide set (i.e. not the Euclidean distance)
 \begin{itemize}
      \item With $w$ representing the body part, $w\in\{0,\dots,30\}$ % these are shown below. note that the body side is important
      \item Note that this is a discriminative model % i.e. we infer a probability mass, not just a single hard label. refer to the models vs. algorithms slides
@@ -700,7 +722,7 @@ Classification using simple depth offset features $f_{\bth}$,
 
 One such feature is weak\\\medskip
 But a strong classifier can be built by combining them\\\medskip 
-Implemented using a \emph{random forest} % this is an example (a powerful one) of an ensemble method, see Bishop's book for more information
+Implemented using a \emph{random forest} % this is a powerful example of an ensemble method, see Bishop's book for more information
 
 \bigskip
 \begin{center}
@@ -717,18 +739,18 @@ Implemented using a \emph{random forest} % this is an example (a powerful one) o
 \frametitle{Kinect Player Pose Estimation}
 \framesubtitle{Pixel Classification -- Random Forests}
 
-Random forest consists of $T$ randomized decision trees
+Random forest consists of $T$ randomized decision trees\\\medskip
+Each tree $t$ consist of split and leaf nodes
 
 \bigskip
-Each tree $t$ consist of split and leaf nodes\\\medskip
 Each split node consists of a feature $f_{\bth}$ and a threshold $\tau$
 \begin{itemize}
     \item $\vx$ branches down based on $f_{\bth_k}>\tau_k$
-    \item Until a leaf node is reached, which stores $\Pr_t(w|\vx)$
+    \item Until a leaf node is reached, which stores $\Pr_t(w|\vx)$ % we get Pr by simply passing each training sample through the final tree and collecting counts for each leaf node and w
 \end{itemize}
 
 \bigskip
-Tree trained from training samples $(\vx,w)$ % extracted from different training images for each tree / for more information on how training works see "Randomized Trees for Real-Time Keypoint Recognition" by Lepetit et al.
+Tree trained from training samples $(\vx,w)$
 \begin{itemize}
     \item Samples differ between trees
     \item $\bth_k,\tau_k$ selected from random subset % a set of features {theta1,...thetax} is generated randomly (hence random tree), and the best thetak are selected from this set (best feature on top, and so on). this reduces correlation between trees, because they use different features
@@ -744,7 +766,7 @@ Tree trained from training samples $(\vx,w)$ % extracted from different training
 
 All trees contribute to the result, $P(w|\vx)=\sfrac{1}{T}\sum_{t=1}^T \Pr_t(w|\vx)$
 \begin{itemize}
-    \item This training \& inference strategy is called \emph{bagging}
+    \item This training \& inference strategy is called \emph{bagging} % we train multiple classifiers from subsets of the training data and then combine their predictions
 \end{itemize}
 
 \bigskip
@@ -800,30 +822,20 @@ Can be accomplished using a constellation model, for example % not sure how the 
 
 \begin{frame}
 \frametitle{Kinect Player Pose Estimation}
-\framesubtitle{Results}
+\framesubtitle{Remarks}
 
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=8cm]{figures/kinect-pose-video.jpg}}
-    {\centering Image from \url{https://www.youtube.com/watch?v=YTBvjLGDluY}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Kinect SDK}
-
-Official SDK for Kinect v1 and v2 \\\medskip
-Provides access to sensor streams, skeleton data, and more\\\medskip
-Available at \url{http://www.microsoft.com/en-us/kinectforwindows/}
+Skeleton data is available from Kinect SDK
+\begin{itemize}
+    \item \url{http://www.microsoft.com/en-us/kinectforwindows/}
+\end{itemize}
 
 \bigskip
-Alternatives for non-windows platforms
+Random forests make for powerful classification/regression models\\\medskip
+Implementations readily available
 \begin{itemize}
-    \item OpenNI2 (\url{https://github.com/occipital/openni2}) % for Kinect v1
-    \item libfreenect2 (\url{https://github.com/OpenKinect/libfreenect2}) % for Kinect v2
+    \item Matlab (\texttt{TreeBagger})
+    \item OpenCV (\texttt{CvRTrees})
+    \item scikit-learn (\texttt{RandomForestClassifier})
 \end{itemize}
 
 \end{frame}

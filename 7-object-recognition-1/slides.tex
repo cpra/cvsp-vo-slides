@@ -22,7 +22,7 @@
 %   \begin{minted}{python}
 %   codeb
 %   \end{minted}
-% \usepackage{minted}
+\usepackage{minted}
 
 % better looking tables
 % usage:
@@ -172,14 +172,17 @@
 \begin{frame}
 \frametitle{Topics}
 
-Taxonomy of recognition problems\\\medskip
-Detection of specific rigid objects\\\medskip
-Efficient face detection\\\medskip
-Image classification
+Selection of recognition problems
+\begin{itemize}
+    \item Detecting specific rigid objects
+    \item Efficient face detection
+    \item Image classification
+\end{itemize}
 
+\bigskip
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=6cm]{figures/local-feature-matching.jpg}}
+    {\includegraphics[width=6.5cm]{figures/local-feature-matching.jpg}}
     {\centering Image from \cite{grauman2011}}
 \end{center}
 
@@ -193,13 +196,13 @@ Image classification
 Instance vs.\ category recognition
 \begin{itemize}
     \item Instance : my face, the Eiffel tower
-    \item Category : faces, buildings, people
+    \item Category : faces, buildings, people % note that categories are hierarchical ... like panda bears - bears - mammals - animals. some test databases reflect this, like ImageNet. obviously, the more general the category, the harder the recognition task
 \end{itemize}
 
 \bigskip
 Classification vs.\ detection
 \begin{itemize}
-    \item Classification : predict class of main object in image
+    \item Classification : predict class of main object in image % here we assume that there is a dominant object in the image, and we care only about the class (instance/category) of that object, ignoring the rest
     \item Detection : multiple objects, possibly of different class % like "detect all faces in image"
 \end{itemize}
 
@@ -211,10 +214,11 @@ Classification vs.\ detection
 \frametitle{Taxonomy of Object Recognition}
 \framesubtitle{Classification}
 
+Blue Mosque (instance), mosque/building (category) % again, categories are hierarchical
+
+\bigskip
 \begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=8cm]{figures/classification-problem.jpg}}
-    {\centering Image from Pierre Sermanet's slides}
+\includegraphics[width=6cm]{figures/blue-mosque.jpg}
 \end{center}
 
 \end{frame}
@@ -227,8 +231,8 @@ Classification vs.\ detection
 
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=8cm]{figures/detection-problem.jpg}}
-    {\centering Image from Pierre Sermanet's slides}
+    {\includegraphics[width=5cm]{figures/face-detection.jpg}}
+    {\centering Image from \cite{prince12}}
 \end{center}
 
 \end{frame}
@@ -258,7 +262,7 @@ Instances of same category can look very differently
 
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=7cm]{figures/panorama-stitching.jpg}} % stitching is not the typical example, but it can be regarded as one
+    {\includegraphics[width=7cm]{figures/panorama-stitching.jpg}} % stitching is not the typical example, but it can be seen as one
     {\centering Image adapted from \cite{brown2007}}
 \end{center}
 
@@ -319,8 +323,8 @@ Guidelines on feature selection
 \begin{itemize}
     \item Features should be invariant to expected transformations % like rotation, scale, affine transforms
     \item And only to these transformations
-    \item Extraction and matching speeds differ % not a problem if object should be searched for in 5 images, but what if in 100.000 images?
-    \item Performance often quite similar, but better test
+    \item Extraction and matching speeds differ % not a problem if object should be searched for in 5 images, but what if in 1000 images? (if there are more, we at some point have to switch to more efficient means, like hashing or vector quantization (like what we do later with visual words))
+    \item Performance often quite similar, but better test % there are also some survey papers around
 \end{itemize}
 
 \end{frame}
@@ -376,7 +380,7 @@ Assume that the object in question is planar
 Relation allows for detecting erroneous correspondences
 \begin{itemize}
     \item Estimate homography $T$ from correspondences % using some robust method, like RANSAC
-    \item Discard correspondences for which $\lVert\vx-T(\vy_1)\rVert>t$ % t is some small threshold that depends on the data, usually a few pixels
+    \item Discard correspondences for which $\lVert\vx-T(\vy_1)\rVert>t$ % if x and y1 really correspond, their projections must lie close together ... t is some small threshold that depends on the data, usually a few pixels
 \end{itemize}
 
 \bigskip
@@ -384,6 +388,75 @@ Verification also possible for nonplanar scenes
 \begin{itemize}
     \item Epipolar geometry constraints (previous lecture) % basically, if we know the intrinsics we can estimate the relative camera positions/orientations, which is all we need as discussed in the previous lecture. if we dont know the intrinsics, this is still possible by computing the fundamental matrix. this is out of scope here, but see any of the CV books referenced below if interested
 \end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Detecting Specific Rigid Objects}
+\framesubtitle{OpenCV Code Example}
+
+\footnotesize
+\begin{minted}{cpp}
+// read images (SIFT expects grayscale images)
+cv::Mat object = cv::imread("object.jpg", cv::IMREAD_GRAYSCALE);
+cv::Mat search = cv::imread("search.jpg", cv::IMREAD_GRAYSCALE);
+
+cv::SIFT sift; // using default arguments here
+
+// compute keypoints
+std::vector<cv::KeyPoint> kobject, ksearch;
+sift.detect(object, kobject); sift.detect(search, ksearch);
+
+// compute descriptors (our x, y)
+cv::Mat dobject, dsearch;
+sift.compute(object, kobject, dobject); sift.compute(search, ksearch, dsearch);
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Detecting Specific Rigid Objects}
+\framesubtitle{OpenCV Code Example}
+
+\footnotesize
+\begin{minted}{cpp}
+// find y1,y2 for each x
+cv::FlannBasedMatcher matcher; // fast nearest neighbor search
+std::vector<std::vector<cv::DMatch> > kMatches;
+matcher.knnMatch(dobject, dsearch, kMatches, 2);
+
+// select good matches (see above slide)
+std::vector<cv::DMatch> matches;
+for(const std::vector<cv::DMatch>& match : kMatches)
+    if(match[0].distance < match[1].distance * 0.8)
+        matches.push_back(match[0]); // (x,y1)
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Detecting Specific Rigid Objects}
+\framesubtitle{OpenCV Code Example}
+
+\footnotesize
+\begin{minted}{cpp}
+// collect feature locations of correspondences
+std::vector<cv::Point2f> pobject, psearch;
+for(const cv::DMatch& match : matches) { 
+    pobject.push_back(kobject.at(match.queryIdx).pt);
+    psearch.push_back(ksearch.at(match.trainIdx).pt);
+}
+
+// estimate homography using RANSAC for robustness
+cv::Mat inliers; // contains indices of valid correspondences
+cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 3, inliers);
+\end{minted}
 
 \end{frame}
 
@@ -475,7 +548,7 @@ Sliding window approach % we don't know where the faces might be, so we just sca
 \begin{itemize}
     \item Slide window over image % note that this results one classification per pixel (unless we chose some offset), and the classification is binary ... w denotes whether a face is present
     \item Infer label $w\in\{0,1\}$ based on measurements $\vx$ % of the current window
-    \item Perform non-maximum suppression of confidence scores % we also get some form of confidence along with the label (similar to the probabilistic models we discussed, but they are not probabilities), which is mandatory for this method to work
+    \item Perform non-maximum suppression of confidence scores % we also get some form of confidence along with the label (similar to the probabilistic models we discussed, but they are not probabilities)
 \end{itemize}
 
 \medskip
@@ -541,7 +614,7 @@ Classification using a \emph{boosted cascade}
 Subset of $K$ best classifiers, their order, and $\bth$ are learned
 
 \bigskip
-Via \emph{boosting} -- for each $k=1\cdots K$
+By means of \emph{boosting} : for each $k=1\cdots K$
 \begin{itemize}
     \item Find best classifier according to training set, add to $C$ % this is the classifier that, if added to the current C(x), leads to the biggest reduction in error
     \item Raise weights of samples misclassified by current $C$
@@ -558,11 +631,31 @@ Via \emph{boosting} -- for each $k=1\cdots K$
 
 % -----------------------------------------------------------------------------
 
+\begin{frame}[fragile]
+\frametitle{Efficient Face Detection}
+\framesubtitle{OpenCV Code Example}
+
+Detect faces using a pretrained cascade\\\medskip
+OpenCV also supports cascade training
+
+\bigskip
+\footnotesize
+\begin{minted}{python}
+# detect faces using a pretrained cascade
+image = cv2.imread('faces.jpg', cv2.IMREAD_GRAYSCALE)
+cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+faces = cascade.detectMultiScale(image) # should tune parameters
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
 \begin{frame}
 \frametitle{Image Classification}
 
 Goal is to predict the class of the main object in an image\\\medskip
-We consider methods based on visual words
+We consider methods based on visual words 
 
 \medskip
 \begin{center}
@@ -578,7 +671,7 @@ We consider methods based on visual words
 \begin{frame}
 \frametitle{Image Classification}
 
-Idea is to represent an image as a collection of \emph{visual words} % this comes from document retrieval - a text consists of words, an image of visual words
+Idea is to represent an image as a collection of \emph{visual words} % this comes from document retrieval - a text consists of words, an image of visual words, so we represent an image by the distribution of its visual words
 \begin{itemize}
     \item Images can be compared based on visual word distribution
 \end{itemize}
@@ -586,7 +679,7 @@ Idea is to represent an image as a collection of \emph{visual words} % this come
 \medskip
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=7cm]{figures/visual-words.jpg}}
+    {\includegraphics[width=7cm]{figures/visual-words.jpg}} % we see that the visual word representations of these images differ, so they are not of the same class
     {\centering Image from \cite{prince12}}
 \end{center}
 
@@ -600,7 +693,7 @@ Idea is to represent an image as a collection of \emph{visual words} % this come
 Visual words are learned from an image collection
 \begin{itemize}
     \item Compute local features for all images
-    \item Cluster these vectors into $k$ clusters using $k$-means
+    \item Cluster these vectors into $k$ clusters using $k$-means % this is the standard method, can use other clustering methods as well
     \item $k$ cluster means represent visual words
 \end{itemize}
 
@@ -617,11 +710,11 @@ Visual words are learned from an image collection
 \begin{frame}
 \frametitle{Image Classification}
 
-Visual word distribution $\vx\in\RR^k$ obtained by
+Visual word distribution $\vx\in\RR^k$ of image obtained by
 \begin{itemize}
     \item Computing local features for current image
-    \item Assigning each feature to closest visual word
-    \item Summing up the assignment counts for each visual word
+    \item Assigning each feature to closest visual word % this is again the simplest approach, better performance can be achieved using fuzzy assignment
+    \item Summing up the assignment counts for each visual word % and normalizing them of course
 \end{itemize}
 
 \begin{center}
@@ -657,12 +750,27 @@ Prediction of class $w$ from $\vx$ using e.g.\ SVM % can use anything here, but 
 The above approach is called \emph{bag of words} model
 \begin{itemize}
     \item Many improvements to this methods exist
+    \item Popular and can work well, but not state of the art % tor this reason, this was quite short, basically in order to make the differences to deep learning clearer
 \end{itemize}
 
 \bigskip
-They can work well, but are not state of the art
+We will look at the current state of the art next time
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Summary}
+
+Object recognition is key to many successful applications
+
+\bigskip
+We have discussed three popular cases
 \begin{itemize}
-    \item More on this in the next slide set
+    \item Detecting specific rigid objects
+    \item Efficient face detection
+    \item Image classification from visual words
 \end{itemize}
 
 \end{frame}

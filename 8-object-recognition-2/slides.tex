@@ -65,7 +65,7 @@
 % -----------------------------------------------------------------------------
 
 % specify PDF metadata
-\hypersetup{pdftitle={CVSP VO - Category Recognition 2 - Deep Learning},pdfsubject={},pdfauthor={Christopher Pramerdorfer}}
+\hypersetup{pdftitle={CVSP VO - Object Recognition 2 - Deep Learning},pdfsubject={},pdfauthor={Christopher Pramerdorfer}}
 
 % copyright font style
 \makeatletter\renewcommand{\CRB@setcopyrightfont}{\tiny\color{lightgray}}
@@ -146,7 +146,7 @@
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
-\subtitle{Deep Learning}
+\subtitle{Object Recognition -- Deep Learning}
 \author{Christopher Pramerdorfer}
 \institute{Computer Vision Lab, Vienna University of Technology}
 
@@ -187,9 +187,9 @@ Deep learning applications
 \framesubtitle{Traditional Approach}
 
 \begin{center}
-\smartdiagram[sequence diagram]{Image,Feature Extraction,Learned Mapping}\\\bigskip % learned mapping maps from the representation to the output, such as a class label
+\smartdiagram[sequence diagram]{Image,Feature Extraction,Learned Mapping}\\\bigskip % learned mapping maps from the representation to the output, such as a class label, i.e. this is our model. however, in this context we don't really know the relation between features and classes (there is no clear relation between the information we are interested in an the measurements, in contrast to e.g. structure from motion), so we use some general model like an SVM, for example.
 \smartdiagramset{transp}
-\smartdiagram[sequence diagram]{Image,SIFT+BOW,SVM}
+\smartdiagram[sequence diagram]{Image,SIFT+BOW,SVM} % this is the bag of visual words based image classification method we covered in the previous lecture
 \end{center}
 
 \end{frame}
@@ -200,10 +200,10 @@ Deep learning applications
 \frametitle{Object Recognition}
 \framesubtitle{Traditional Approach}
 
-Problem: how to choose the representation/features? % the representation comprises all features
+Problem: how to choose the representation/features? % the representation comprises all features, for example the visual word frequencies in case of bag of visual words
 
 \bigskip
-\enquote{General} features not optimal
+\enquote{General} features not optimal % like sift or others
 \begin{itemize}
 	\item Not tuned to task at hand, low-level
 \end{itemize}
@@ -211,7 +211,7 @@ Problem: how to choose the representation/features? % the representation compris
 \bigskip
 Designing task-specific features is complex
 \begin{itemize}
-	\item Virtually impossible to do optimally
+	\item Virtually impossible to do optimally % think of manually designing features that respond to human heads (not a single one, but to heads in general)
 \end{itemize}
 
 \end{frame}
@@ -226,7 +226,7 @@ Solution: learn representation as well\\\medskip % this is called ... representa
 Learning high-level representations directly is difficult
 
 \bigskip
-Deep Learning (DL) solves this
+\emph{Deep Learning} (DL) solves this
 \begin{itemize}
 	\item By learning a hierarchy of representations % hence "deep" / hierarchy is fixed, everything else is learned
 	\item Layers in hierarchy build upon each other % from low-level to high-level representation
@@ -260,7 +260,26 @@ Learned jointly with the output mapping
 \bigskip
 \begin{center}
 \smartdiagramset{sequence item text width=1cm}
-\smartdiagram[sequence diagram]{Image,LF $1$,$\dots$,LF $n$,LM}
+\smartdiagram[sequence diagram]{Image,LF $1$,$\dots$,LF $n$,LM} % LF = learned features, % LM = learned mapping
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Object Recognition}
+\framesubtitle{Deep Learning}
+
+Methods based on DL are state of the art
+\begin{itemize}
+	\item For almost all recognition-related CV tasks
+\end{itemize}
+
+\bigskip
+\begin{center}
+	\enquote{From now on, DL has to be considered as the primary\\ candidate in essentially any visual recognition task}\\
+	~ [\cite{razavian14}] % check out this paper. also see Pierre Sermanet's slides for a good overview of how DL has advanced the state of the art in many fields, available here: https://sites.google.com/site/deeplearningcvpr2014/
 \end{center}
 
 \end{frame}
@@ -270,7 +289,7 @@ Learned jointly with the output mapping
 \begin{frame}
 \frametitle{Multilayer Perceptrons}
 
-DL is usually realized using MultiLayer Perceptrons (MLPs) % also known as feed-forward neural networks
+DL is realized using MultiLayer Perceptrons (MLPs) % also known as feed-forward neural networks
 
 \bigskip
 \begin{center}
@@ -350,8 +369,10 @@ Hidden units connected to layer of $K$ output units
 \frametitle{Multilayer Perceptrons}
 \framesubtitle{Two-Layer Architecture}
 
-Output of $m$th hidden unit is $z_m(\vx)=f(\vw_m^\top\vx)$\\\medskip
-Bias $b$ included in $\vw$ and $\vx$, $w_0=b$, $x_0=1$
+Output of $m$th hidden unit is $z_m(\vx)=f(\vw_m^\top\vx)$
+\begin{itemize}
+	\item Bias $b$ included in $\vw$ and $\vx$, $w_0=b$, $x_0=1$
+\end{itemize}
 
 \bigskip
 \begin{center}
@@ -393,8 +414,6 @@ Both $f$ and $g$ are differentiable
 \end{itemize}
 
 \end{frame}
-
-% so we 
 
 % -----------------------------------------------------------------------------
 
@@ -498,7 +517,7 @@ Full example: \url{https://github.com/cpra/cvsp-vo-slides}
 
 Above MLP architecture does not scale to images
 \begin{itemize}
-    \item VGA resolution, $M=1000$: $\sim300$ million params % we don't have enough images to train such nets without running into overfitting problems
+    \item VGA resolution, $M=1000$: $\sim300$ million params % we don't have enough images to train such nets without running into overfitting problems. also, such models are too general in an image context, because they do not enforce constraints due to the topology of images (adjacent pixels are correlated because they correspond to adjacent parts of the depicted object)
 \end{itemize}
 
 \medskip
@@ -570,8 +589,10 @@ Exploit topology through locally connected layers % this concept is called local
 \framesubtitle{Convolutional Layers}
 
 Convolutional layer consists of $F$ feature maps\\\medskip % which usually have the same size as the input, as shown in the image
-Each map consists of $M$ hidden units with \emph{shared} weights\\\medskip
-Hidden units have a local receptive field % i.e. connected to only a local 
+Each map consists of $M$ hidden units with \emph{shared} weights\\\medskip % the motivation for this is that features that are useful in one region in the image should be so also in other regions ... by this we gain translation invariance
+Hidden units have a local receptive field % i.e. connected to only a local neighborhood in the input layer (the image in the below figure). this is motivated by the correlation characteristics outlined above
+
+% as all units have a local receptive field and because the weights are shared, the transformations carried out by a feature map (before applying the nonlinearity) corresponds to a convolution with a learned kernel w, hence convolutional NN
 
 \medskip
 \begin{center}
@@ -641,11 +662,11 @@ Feature map evaluation equals
 \framesubtitle{Pooling Layers}
 
 After convolutional layer\\\medskip
-Hidden units pool information locally (\eg max, avg)\\\medskip
-Data reduction, robustness to small translations
+Hidden units pool information locally (\eg max, avg)\\\medskip % usually it's max
+Data reduction, robustness to small translations % of the input images
 
 % the below figure shows a 2x2 pooling layer, which is a common size
-% pooling layers have no nonlinearity, but trained weights
+% pooling layers have no nonlinearity, but sometimes trained weights
 
 \medskip
 \begin{center}
@@ -751,7 +772,8 @@ Produce more expressive, robust features
 % details vary strongly depending on the task at hand, of course
 
 MLPs with above layers are Convolutional Neural Networks (CNNs)\\\medskip
-Usually several Conv $\Rightarrow$ Norm $\Rightarrow$ Pooling blocks
+Usually several Conv $\Rightarrow$ Norm $\Rightarrow$ Pooling blocks\\\medskip
+Later Conv layers operate on multiple feature maps % i.e. they have a 3D receptive field / correspond to 3D convolutions (like 5x5x10 = 5x5 over 10 feature maps)
 
 \medskip
 \begin{center}
@@ -808,7 +830,7 @@ Among first applications of CNNs (1989!)
 \framesubtitle{Zip Code Recognition}
 
 % H1: convolutional with 5x5 receptive field, 12 feature maps, 2x2 pooling (during convolution, to be precise ... see the paper for more information), also, biases as not shared in this case
-% H2: 5x5x8 receptive field (3D convolution), 12 feature maps, 2x2 pooling as above
+% H2: 5x5x8 receptive field (see above slide), 12 feature maps, 2x2 pooling as above
 % H3: hidden layer of traditional MLP with H2 as input
 % total number of params is only around 10k
 
@@ -925,39 +947,6 @@ Object recognition on the ImageNet database
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}
-\frametitle{Deep Learning Applications}
-\framesubtitle{Object Recognition -- \cite{krizhevsky2012}}
-
-Object classification and localization via DL\\\medskip % classification: assign single label of the main object present in the image / localization: do the same, but also locate it in the image. detection would be to locate any number of objects (including zero), and segmentation involves labeling each pixel
-Won the 2012 challenge by a large margin\\\medskip % 10% better classification, 15% better localization
-$\sim60$ million parameters, $\sim1.2$ million training images % training took 5-6 days on two GPUs
-
-\bigskip
-\begin{center}
-\smartdiagramset{sequence item text width=0.8cm,sequence item width=1.25cm}
-\smartdiagram[sequence diagram]{CNP,CNP,CCC,P,FF}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Deep Learning Applications}
-\framesubtitle{Object Recognition -- \cite{krizhevsky2012}}
-
-Implemented using cuda-convnet
-\begin{itemize}
-    \item \url{https://code.google.com/p/cuda-convnet/}
-    \item Open-source C++/CUDA implementation of CNNs
-    \item Network structure definitions available on the webpage
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
 \begin{frame}[fragile]
 \frametitle{Deep Learning Applications}
 \framesubtitle{Object Recognition}
@@ -993,26 +982,11 @@ DL has lead to significant performance gains on ImageNet
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}
-\frametitle{Deep Learning Applications}
-\framesubtitle{Object Recognition}
-
-\begin{center}
-    Online demo of 2013 winner of classification challenge
-
-    \bigskip
-    \url{http://www.clarifai.com/}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
 \begin{frame}[fragile]
 \frametitle{Deep Learning Applications}
 \framesubtitle{Object Recognition}
 
-Results of 2014 object detection challenge (excerpt) % see above for object detection definition
+Results of 2014 ImageNet object detection challenge (excerpt) % see below slide for detection definition
 
 % DL wins if there is much data available (no *), but a shallow method MUS won the competition on a reduced data set (*) to a deep method (MSRA). complex DL nets require a significant amount of training data due to the large number of parameters, which can be a limitation
 
@@ -1040,6 +1014,54 @@ Results of 2014 object detection challenge (excerpt) % see above for object dete
 
 \begin{frame}
 \frametitle{Deep Learning Applications}
+\framesubtitle{Object Recognition -- \cite{krizhevsky2012}}
+
+Object classification and localization via DL\\\medskip % classification: assign single label of the main object present in the image / localization: do the same, but also locate it in the image. detection would be to locate any number of objects (including zero), and segmentation involves labeling each pixel
+Won the 2012 challenge by a large margin\\\medskip % 10% better classification, 15% better localization
+$\sim60$ million parameters, $\sim1.2$ million training images % training took 5-6 days on two GPUs
+
+\bigskip
+\begin{center}
+\smartdiagramset{sequence item text width=0.8cm,sequence item width=1.25cm}
+\smartdiagram[sequence diagram]{CNP,CNP,CCC,P,FF}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Deep Learning Applications}
+\framesubtitle{Object Recognition -- \cite{krizhevsky2012}}
+
+Implemented using cuda-convnet
+\begin{itemize}
+    \item \url{https://code.google.com/p/cuda-convnet/}
+    \item Open-source C++/CUDA implementation of CNNs
+    \item Network structure definitions available on the webpage
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Deep Learning Applications}
+\framesubtitle{Object Recognition}
+
+\begin{center}
+    Online demo of 2013 winner of classification challenge
+
+    \bigskip
+    \url{http://www.clarifai.com/}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Deep Learning Applications}
 \framesubtitle{Other Applications}
 
 Scene labeling\\\medskip
@@ -1047,6 +1069,7 @@ Action recognition\\\medskip
 Speech recognition\\\medskip
 ...
 
+% see Sermannet's slides, link is above
 % video of pedestrian detection: https://www.youtube.com/watch?v=uKU2pzpGUlM
 
 \end{frame}
@@ -1079,7 +1102,7 @@ Several free implementations available
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}[allowframebreaks=0.9]
+\begin{frame}[allowframebreaks=0.8]
 \frametitle{Bibliography}
 
 \printbibliography

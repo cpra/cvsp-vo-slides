@@ -41,9 +41,6 @@
 \usepackage{fontspec}
 \setmonofont[Scale=0.7]{Cousine} % part of ttf-chromeos fonts on Arch
 
-% improve microtypography
-\usepackage{microtype}
-
 % multi-language quotes for babel
 \usepackage{csquotes}
 
@@ -56,6 +53,9 @@
 % language support (english,ngerman)
 \usepackage[english]{babel}
 
+% plots (part of texlive-pictures)
+\usepackage{pgfplots}
+
 % -----------------------------------------------------------------------------
 
 % specify PDF metadata
@@ -64,9 +64,6 @@
 % copyright font style
 \makeatletter\renewcommand{\CRB@setcopyrightfont}{\tiny\color{lightgray}}
 
-% make emph bold
-\DeclareTextFontCommand{\emph}{\bfseries}
-
 % add bib file
 \addbibresource{literature.bib}
 
@@ -74,6 +71,9 @@
 \usetheme{tuwcvl}
 
 % -----------------------------------------------------------------------------
+
+% pgfplot figure size
+\pgfplotsset{width=7.5cm,compat=1.11}
 
 % common english abbreviations
 \newcommand{\ie}{\mbox{i.e.}\xspace} % i.e.
@@ -107,11 +107,14 @@
 \newcommand{\vy}{\vec{y}}
 \newcommand{\vz}{\vec{z}}
 
+% highlight
+\newcommand{\highlight}[1]{\textcolor{tuwcvl_inf_red}{\textbf{#1}}}
+
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
 \subtitle{Introduction}
-\author{Christopher Pramerdorfer}
+\author{Martin Kampel, Christopher Pramerdorfer}
 \institute{Computer Vision Lab, Vienna University of Technology}
 
 \begin{document}
@@ -127,9 +130,9 @@
 \begin{frame}
 \frametitle{Lecture Topics}
 
-Computer Vision (CV) software and resources\\\medskip
-Models vs.\ algorithms\\\medskip
-CV applications with commercial success
+\begin{center}
+Computer Vision from an applied point of view
+\end{center}
 
 \bigskip
 \begin{center}
@@ -144,20 +147,31 @@ CV applications with commercial success
 
 \begin{frame}
 \frametitle{Lecture Topics}
-\framesubtitle{Computer Vision Software and Resources}
+\framesubtitle{Introduction}
 
-Programming languages and libraries
+\begin{columns}
+\column{0.6\textwidth}
+
+What exactly is Computer Vision (CV)?
+
+\bigskip
+Relation to other fields
 \begin{itemize}
-	\item Matlab
-	\item Python (SciPy, scikits, ...)
-	\item C++ (OpenCV, Shark, Caffe, ...)
+	\item Image processing, statistics ...
 \end{itemize}
 
 \bigskip
-Programming resources (throughout lecture)
-\begin{itemize}
-	\item Code snippets, weblinks
-\end{itemize}
+Brief image processing recap
+
+\column{0.35\textwidth}
+
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=3.5cm]{figures/deep-image-descriptions.png}}
+	{\centering Image from \url{http://cs.stanford.edu/}}
+\end{center}
+
+\end{columns}
 
 \end{frame}
 
@@ -165,14 +179,59 @@ Programming resources (throughout lecture)
 
 \begin{frame}
 \frametitle{Lecture Topics}
-\framesubtitle{Models vs. Algorithms}
+\framesubtitle{Tools for CV development}
 
-How to approach CV problems systematically
+\begin{columns}
+\column{0.6\textwidth}
+
+Programming languages
 \begin{itemize}
-	\item Difference between models and algorithms
-	\item How to model and solve CV problems
-	\item Numerical optimization
+	\item Matlab, Python, C++
+	\item Pros and cons
+	\item Tips for language selection
 \end{itemize}
+
+\bigskip
+Popular libraries
+\begin{itemize}
+	\item OpenCV, NumPy, Caffe, scikits
+\end{itemize}
+
+\bigskip
+Code snippets and weblinks
+
+\column{0.35\textwidth}
+
+\begin{center}
+{\copyrightbox[b]
+	{\includegraphics[width=3cm]{figures/opencv-logo.png}}
+	{\centering Image from \url{opencv.org}}}
+\end{center}
+
+\end{columns}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Lecture Topics}
+\framesubtitle{Tips for approaching CV problems}
+
+Searching for existing solutions to a given problem \\\medskip
+How to model and solve CV problems systematically
+
+\bigskip
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    hide axis,
+    colormap/cool,
+]
+\addplot3[mesh,samples=50,domain=-8:8]{(x-2)^2+(y-1)^2};
+\end{axis}
+\end{tikzpicture}
+\end{center}
 
 \end{frame}
 
@@ -182,19 +241,19 @@ How to approach CV problems systematically
 \frametitle{Lecture Topics}
 \framesubtitle{Selected CV Applications}
 
-CV applications with commercial success
+Popular and (hopefully) interesting CV applications
 \begin{itemize}
-	\item Face detection and panorama stitching in cameras
+	\item Face and smile detection in cameras
 	\item Player pose estimation from 3D data for gaming (Kinect)
-	\item Face and object recognition
+	\item Image recognition via deep learning
 \end{itemize}
 
 \bigskip
-We will see
-\begin{itemize}
-	\item How they work
-	\item How they are implemented
-\end{itemize}
+\begin{center}
+	\copyrightbox[b]
+	{\includegraphics[width=10cm]{figures/intro-collage.png}}
+	{\centering Images from \cite{lecun1989}, \cite{shotton2011}, \cite{taigman2013}}
+\end{center}
 
 \end{frame}
 
@@ -203,11 +262,9 @@ We will see
 \begin{frame}
 \frametitle{Lecture Location and Schedule}
 
-\textbf{Location}: Seminarraum 183/2, Favoritenstr. 9\\
-\textbf{Time}: Wed 10:15 -- 11:45 s.t.
-
-\bigskip
-\textbf{Schedule}: \url{http://www.caa.tuwien.ac.at/cvl/teaching/wintersemester/cvsp_vo/index.html}
+\textbf{Location}: Seminarraum 183/2, Favoritenstr. 9\\\medskip
+\textbf{Time}: Wed 10:15 -- 11:45 s.t. \\\medskip
+\textbf{Schedule}: \url{http://www.caa.tuwien.ac.at/cvl/course/computer-vision-systems-programming-vo/}
 
 \bigskip
 Follow \texttt{@tuwcvsp} on Twitter for updates
@@ -219,17 +276,10 @@ Follow \texttt{@tuwcvsp} on Twitter for updates
 \begin{frame}
 \frametitle{Prerequisites}
 
-Basic image processing and computer vision knowledge
+Completed entry-level course such as
 \begin{itemize}
-	\item What is linear filtering?
-	\item What is a camera matrix?
-\end{itemize}
-
-\bigskip
-Some knowledge of probability is recommended
-\begin{itemize}
-	\item What is a normal distribution?
-	\item What is Bayes' rule?
+	\item \enquote{Einführung in Visual Computing} [186.822]
+	\item \enquote{Computer Vision} [183.585]
 \end{itemize}
 
 \end{frame}
@@ -239,10 +289,18 @@ Some knowledge of probability is recommended
 \begin{frame}
 \frametitle{Grading}
 
-There will be an oral exam (about 15 minutes)
+Oral exam
+\begin{itemize}
+	\item 15 minutes
+	\item Four random questions from a public list
+	\item German or English
+\end{itemize}
 
 \bigskip
-Dates will be posted on \url{http://www.caa.tuwien.ac.at/cvl/teaching/wintersemester/cvsp_vo/index.html}
+Several time slots after lecture (December)
+\begin{itemize}
+	\item More slots on request
+\end{itemize}
 
 \end{frame}
 
@@ -254,7 +312,7 @@ Dates will be posted on \url{http://www.caa.tuwien.ac.at/cvl/teaching/winterseme
 We recommend the associated lab exercise to
 \begin{itemize}
 	\item Explore a CV topic of your choice in more detail
-	\item Get used to software covered in this lecture
+	\item Apply what you will learn in this lecture
 \end{itemize}
 
 \end{frame}

@@ -700,6 +700,7 @@ Let's recap some generic IP methods for
     \item Detecting brightness changes
     \item Detecting interest points in images
     \item Describing image patches in an invariant way
+    \item Dimensionality reduction
 \end{itemize}
 
 \end{frame}
@@ -998,6 +999,154 @@ SIFT descriptors are
     \item Invariant to scale and rotation (interest points)
     \item Invariant to global intensity changes (gradients)
     \item Robust to small affine transformations (pooling)
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Processing Recap}
+\framesubtitle{Dimensionality Reduction}
+
+Reduce the dimensionality of $\vx$ by removing irrelevant features  % more precisely, if we remove features but leave the reset u, c=color, marker='x', cmap=plt.get_cmap('cool')nchanged, we speak of feature selection. if we compute new features, we speak of feature extraction
+\begin{itemize}
+    \item Irrelevant means redundant or not discriminative (e.g.\ noise)
+\end{itemize}
+
+\bigskip
+Advantages
+\begin{itemize}
+    \item Makes learning and inference more efficient  % because we have less data
+    \item Can improve generalization performance  % because we can avoid/limit the effects of the curse of dimensionality
+    \item Facilitates data visualization  % because we cannot (intuitively) visualize 4+D data
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Processing Recap}
+\framesubtitle{Dimensionality Reduction -- PCA}
+
+Assume the following data (30 samples $\vx_1\cdots\vx_{30}$, $\dim(\vx)=2$)
+\begin{itemize}
+    \item Features are highly correlated
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=5cm]{figures/pca-original.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Processing Recap}
+\framesubtitle{Dimensionality Reduction -- PCA}
+
+We want to map the $\vx_k$ to a linear subspace\\\medskip
+Spanned by directions of largest data variation
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-original.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Processing Recap}
+\framesubtitle{Dimensionality Reduction -- PCA}
+
+Standardize individual features (zero mean, unit stddev)\\\medskip  % stddev = standard deviation. stddevs don't have to be 1 but they should be similar, otherwise some features will outweigh others
+Compute covariance matrix $\Sigma$
+\begin{itemize}
+    \item Eigenvectors $\vu_1,\vu_2$ of $\Sigma$ are sought direction vectors
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-eigenvectors.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Processing Recap}
+\framesubtitle{Dimensionality Reduction -- PCA}
+
+Represent $\vx_k$ in the $U=(\vu_1,\vu_2)$ basis, $\vx^r_k=U^\top\vx_k$
+\begin{itemize}
+    \item $\vu_1,\vu_2$ are orthogonal, so $U$ is a rotation matrix % because sigma is symmetric
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-rotated.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Processing Recap}
+\framesubtitle{Dimensionality Reduction -- PCA}
+
+Now we can simply drop features that vary little  % this is visualized here by setting them to 0
+\begin{itemize}
+    \item Encoded by the corresponding eigenvalues $\lambda_1,\lambda_2$
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-reduced.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Processing Recap}
+\framesubtitle{Dimensionality Reduction -- PCA}
+
+If desired we can approximate $\vx_k$ by multiplying with $U$  % after padding with zeros of course
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-reconstructed.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Image Processing Recap}
+\framesubtitle{Dimensionality Reduction -- PCA}
+
+This method is called \emph{Principal Component Analysis (PCA)}
+
+\bigskip
+Used to find features that retain e.g.\ 99\% of variance
+\begin{itemize}
+    \item Often leads to a significant dimensionality reduction
+\end{itemize}
+
+\bigskip
+Used to perform \emph{whitening} % to do so we simply rotate the x as before and then divide them by the square root of the corresponding eigenvalues. this results in unit variance
+\begin{itemize}
+    \item To obtain uncorrelated features with same variance % features extracted via pca are uncorrelated as the data were projected onto orthogonal eigenvectors
+    \item Needed by some ML algorithms
+\end{itemize}
+
+\bigskip
+PCA is unsupervised (no $\dot{\vw}$ required) and linear
+\begin{itemize}
+    \item There are more powerful supervised / non-linear methods
 \end{itemize}
 
 \end{frame}

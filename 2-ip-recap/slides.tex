@@ -22,7 +22,7 @@
 %   \begin{minted}{python}
 %   codeb
 %   \end{minted}
-\usepackage{minted}
+% \usepackage{minted}
 
 % better looking tables
 % usage:
@@ -40,9 +40,6 @@
 % system font support (requires xetex or luatex)
 \usepackage{fontspec}
 \setmonofont[Scale=0.7]{Cousine} % part of ttf-chromeos fonts on Arch
-
-% improve microtypography
-\usepackage{microtype}
 
 % multi-language quotes for babel
 \usepackage{csquotes}
@@ -64,14 +61,11 @@
 % copyright font style
 \makeatletter\renewcommand{\CRB@setcopyrightfont}{\tiny\color{lightgray}}
 
-% make emph bold
-\DeclareTextFontCommand{\emph}{\bfseries}
+% add bib file
+\addbibresource{literature.bib}
 
 % use tuwcvl beamer theme
 \usetheme{tuwcvl}
-
-% add bib file
-\addbibresource{literature.bib}
 
 % -----------------------------------------------------------------------------
 
@@ -107,12 +101,15 @@
 \newcommand{\vy}{\vec{y}}
 \newcommand{\vz}{\vec{z}}
 
-\newcommand{\vX}{\vec{X}}
+\newcommand{\pv}{\ensuremath{\boldsymbol{\theta}}}
+
+% highlight
+\newcommand{\highlight}[1]{\textcolor{tuwcvl_inf_red}{\textbf{#1}}}
 
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
-\subtitle{A Recap of Image Processing}
+\subtitle{Image Processing Recap}
 \author{Christopher Pramerdorfer}
 \institute{Computer Vision Lab, Vienna University of Technology}
 
@@ -129,17 +126,14 @@
 \begin{frame}
 \frametitle{Topics}
 
-A brief recap of Image Processing (IP)
-\begin{itemize}
-	\item Assuming you are already familiar with IP
-	\item Focus on methods that are widely used in practice
-\end{itemize}
+Brief \emph{Image Processing} (IP) recap\\\medskip
+Assuming you are already familiar with it
 
-\medskip
+\bigskip
 \begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=8cm]{figures/intro-collage.png}}
-	{\centering Images from \cite{prince12}}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/intro-collage.png}}
+    {\centering Images from \cite{prince12}}
 \end{center}
 
 \end{frame}
@@ -147,41 +141,21 @@ A brief recap of Image Processing (IP)
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Relation of IP and CV}
+\frametitle{Image Processing Recap}
 
-IP encompasses operations that
+We use IP to extract good features from images
 \begin{itemize}
-	\item Take images as input
-	\item Produce images or representations (\eg descriptors)
-\end{itemize}
-
-\medskip
-We regard IP as preprocessing for CV
-\begin{itemize}
-	\item IP has great influence on CV performance
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Relation of IP and CV}
-
-CV is all about
-\begin{itemize}
-	\item Infering some world state $\vw$
-	\item From measurements $\vx$
+    \item Preprocessing step for CV
+    \item IP has great influence on CV performance
 \end{itemize}
 
 \bigskip
-We use IP to obtain a suitable $\vx$ from images % in some tasks x are actual images
+What are good features? More on this later
 
 \bigskip
-Suitable often means
+Let's recap some basic IP methods
 \begin{itemize}
-	\item Distinctive features % e.g. descriptors
-	\item That are robust and covariant % see Tuytelaars08 for covariance vs invariance
+    \item No details, this is not an IP lecture
 \end{itemize}
 
 \end{frame}
@@ -189,112 +163,14 @@ Suitable often means
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Contrast Normalization}
+\frametitle{Linear Filtering}
 
-Reduce variation due to contrast and intensity changes
+Used for many low-level tasks\\\medskip
+Pixel values are linear combination of neighbor values\\\medskip
+Computed via \emph{convolution} (or correlation) with kernel $h$ \\\medskip
+Different responses depending on kernel
 
 \bigskip
-We cover two techniques
-\begin{itemize}
-	\item Whitening
-	\item Histogram equalization
-\end{itemize}
-
-\medskip
-\begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=8cm]{figures/contrast-original.png}}
-	{\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Contrast Normalization}
-\framesubtitle{Whitening}
-
-Transform pixel values so that
-\begin{itemize}
-	\item Their mean is zero
-	\item Their variance is one % i.e. the resulting values are floats. if required, the result can be mapped to [0, 255] again by mapping -1 to 0 and 1 to 255, for example
-\end{itemize}
-
-\medskip
-\begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=8cm]{figures/contrast-whitening.png}}
-	{\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}[fragile]
-\frametitle{Contrast Normalization}
-\framesubtitle{Whitening -- Matlab Implementation}
-
-\begin{minted}{matlab}
-img = single(rgb2gray(imread('image.png'))); % load
-m = mean(img(:)); % compute mean
-s = std(img(:)); % compute standard deviation
-whitened = (img - m) / s; % normalize
-\end{minted}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Contrast Normalization}
-\framesubtitle{Histogram equalization}
-
-Transform pixel values so that distribution is \enquote{flat} % not exactly flat because input is descrete (see example images on Wikipedia)
-\begin{itemize}
-	\item Cumulative histogram linear over value range % like 0 ... 255 in 8-bit case
-\end{itemize}
-
-\medskip
-\begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=8cm]{figures/contrast-histeq.png}}
-	{\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}[fragile]
-\frametitle{Contrast Normalization}
-\framesubtitle{Histogram Equalization -- C++ Implementation}
-
-\begin{minted}{cpp}
-// cv = OpenCV namespace
-cv::Mat img, equalized; // storage
-img = cv::imread("image.png", cv::IMREAD_GRAYSCALE); // load
-cv::equalizeHist(img, equalized); // normalize
-\end{minted}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Noise Reduction and Change Detection}
-
-Reduce image noise\\\medskip
-Locate intensity changes
-
-\bigskip
-Often accomplished via \emph{linear filtering}
-\begin{itemize}
-	\item Pixel values linear combination of neighbor values
-	\item Computed via convolution (or correlation)
-\end{itemize}
-
 \[
 f'(x,y) = \sum_{i,j}f(x-i,y-j)h(i,j) % with convolution the kernel is flipped (x-i,y-j), with correlation this is not the case (x+i,y+j) ... most IP kernels are symmetric so the result is the same
 \]
@@ -304,185 +180,104 @@ f'(x,y) = \sum_{i,j}f(x-i,y-j)h(i,j) % with convolution the kernel is flipped (x
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Noise Reduction and Change Detection}
-\framesubtitle{Noise Reduction via Blurring}
+\frametitle{Linear Filtering}
+\framesubtitle{Noise Reduction}
 
-Use a 2D Gaussian as kernel $h$:
+Gain robustness to noise via image blurring\\\medskip
+Can be performed by using a 2D Gaussian as kernel $h$ % there are of course others as well
 \[
 h(i,j)=\frac{1}{2\pi\sigma^2}\exp\left(-\frac{i^2+j^2}{2\sigma^2}\right)
 \]
 
 \begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=8cm]{figures/linear-blur.png}}
-	{\centering Images from \cite{prince12}}
+    \copyrightbox[b]
+    {\includegraphics[width=8cm]{figures/linear-blur.png}}
+    {\centering Images from \cite{prince12}}
 \end{center}
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}[fragile]
-\frametitle{Noise Reduction and Change Detection}
-\framesubtitle{Noise Reduction via Blurring -- Matlab Implementation}
-
-\begin{minted}{matlab}
-img = rgb2gray(imread('image.png')); % load
-h = fspecial('gaussian', [3 3], 0.5); % create Gaussian kernel
-filtered = imfilter(img, h); % filter
-\end{minted}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
 \begin{frame}
-\frametitle{Noise Reduction and Change Detection}
-\framesubtitle{Change Detection via LoG Filtering}
+\frametitle{Linear Filtering}
+\framesubtitle{Detecting Brightness Changes -- LoG Filter}
 
+Brightness changes can be valuable information
+\begin{itemize}
+    \item Object boundaries, textured regions
+\end{itemize}
+
+\bigskip
 Use a Laplacian of Gaussian (LoG) filter as kernel $h$ % for 3x3 this is just [0 -1 0 ; -1 4 -1 ; 0 -1 0]
 \begin{itemize}
-	\item Gaussian for noise reduction
-	\item Laplacian approximates $\nabla^2=f_{xx}+f_{yy}$ % sum of second unmixed derivatives of image
+    \item Gaussian for noise reduction
+    \item Laplacian approximates $\nabla^2=f_{xx}+f_{yy}$ % sum of second unmixed derivatives of image
 \end{itemize}
 
 \bigskip
 LoG filters respond to intensity changes % strong response near corners, zero crossing on corners
 \begin{itemize}
-	\item Regardless of direction
-	\item At a frequency defined by $\sigma$ of Gaussian
+    \item Regardless of direction
+    \item At a frequency defined by $\sigma$ of Gaussian
 \end{itemize}
-
-\bigskip
-Substrate for SIFT interest points % SIFT actually used differences of Gaussians to approximate LoG, which is faster
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Noise Reduction and Change Detection}
-\framesubtitle{Change Detection via LoG Filtering}
+\frametitle{Linear Filtering}
+\framesubtitle{Detecting Brightness Changes -- LoG Filter}
 
+Bright and dark regions indicate brightness changes
+
+\bigskip
 \begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=7cm]{figures/linear-log.png}}
-	{\centering Images from \cite{prince12}}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/linear-log.png}}
+    {\centering Images from \cite{prince12}}
 \end{center}
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}[fragile]
-\frametitle{Noise Reduction and Change Detection}
-\framesubtitle{Change Detection via LoG Filtering -- Matlab Implementation}
-
-\begin{minted}{matlab}
-img = rgb2gray(imread('image.png')); % load
-h = fspecial('log', [3 3], 0.5); % create LoG kernel
-filtered = imfilter(img, h); % filter
-\end{minted}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
 \begin{frame}
-\frametitle{Noise Reduction and Change Detection}
-\framesubtitle{Change Detection via Gabor Filtering}
+\frametitle{Linear Filtering}
+\framesubtitle{Detecting Brightness Changes -- Gabor Filter}
 
+Direction of brightness changes can be valuable
+\begin{itemize}
+    \item Texture characteristics
+\end{itemize}
+
+\bigskip
 Use a Gabor filter as kernel $h$, which consists of
 \begin{itemize}
-	\item A Gaussian for noise reduction
-	\item A Sinusoid for change detection 
+    \item A Gaussian for noise reduction
+    \item A Sinusoid for change detection 
 \end{itemize}
 
 \bigskip
 Gabor filters respond to intensity changes at a
 \begin{itemize}
-	\item Phase and orientation defined by the Sinusoid % phase, orientation, wavelength, but can be made independent of phase by summing squared responses of two filters with pi/2 phase shift
-	\item Frequency defined by the Gaussian and Sinusoid
+    \item Phase and orientation defined by the Sinusoid % phase, orientation, wavelength, but can be made independent of phase by summing squared responses of two filters with pi/2 phase shift
+    \item Frequency defined by the Gaussian and Sinusoid
 \end{itemize}
-
-\bigskip
-Substrate for object recognition and scene understanding
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Noise Reduction and Change Detection}
-\framesubtitle{Change Detection via Gabor Filtering}
+\frametitle{Linear Filtering}
+\framesubtitle{Detecting Brightness Changes -- Gabor Filter}
 
 \begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=10cm]{figures/linear-gabor.png}}
-	{\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}[fragile]
-\frametitle{Noise Reduction and Change Detection}
-\framesubtitle{Change Detection via Gabor Filtering -- C++ Implementation}
-
-% OpenCV does not provide LoG filters, so we can either create them by
-% convolving a Gaussian and a Laplacian or we can apply both filters consecutively
-% this is possible because convolution is associative
-
-\begin{minted}{cpp}
-cv::Mat img, gabor; // storage
-img = cv::imread("image.png", cv::IMREAD_GRAYSCALE); // load
-h = cv::getGaborKernel(...); // create Gabor kernel
-cv::filter2D(img, gabor, CV_32F, h); // filter
-
-\end{minted}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Interest Point Detection}
-
-Interest points are image features that
-\begin{itemize}
-	\item Are local (precise location, little spatial extent) % at the end they are just points (precise location (up to subpixel) and no extent), but since they are computed from a local neighborhood, they have an implicit spatial extent (see Tuytelaars08)
-	\item Can be detected reliably in multiple images of same object % i.e. high repeatability
-\end{itemize} % this is not a complete definition, see Tuytelaars08 for more information
-
-\bigskip
-Which implies that they are
-\begin{itemize}
-	\item Invariant to image transformations
-	\item Robust with respect to noise
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Interest Point Detection}
-\framesubtitle{Harris Corner Detector}
-
-Corners characterized by intensity change in multiple directions
-
-\bigskip
-Harris corner detector exploits this by
-\begin{itemize}
-	\item Checking gradient distribution in local neighborhood
-	\item Corner: gradient distribution has two large eigenvalues
-\end{itemize}
-
-\begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=10cm]{figures/cornerness.png}}
-	{\centering Images from \cite{szeliski2010}}
+    \copyrightbox[b]
+    {\includegraphics[width=10cm]{figures/linear-gabor.png}}
+    {\centering Images from \cite{prince12}}
 \end{center}
 
 \end{frame}
@@ -491,33 +286,18 @@ Harris corner detector exploits this by
 
 \begin{frame}
 \frametitle{Interest Point Detection}
-\framesubtitle{Harris Corner Detector}
 
-Harris interest points
+\emph{Interest points} (keypoints) are
 \begin{itemize}
-	\item Are invariant to translation and rotation
-	\item Stable under varying lighting conditions % because they are based on derivatives
-\end{itemize} % they are also among the most repeatable and most informative, see Tuytelaars08
+    \item Distinctive locations in images
+    \item Invariant and robust to image transformations % depending on the type of keypoint
+\end{itemize}
 
-\medskip
-\begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=8cm]{figures/ip-harris.png}}
-	{\centering Images from \cite{tuytelaars2008}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}[fragile]
-\frametitle{Interest Point Detection}
-\framesubtitle{Harris Corner Detector -- Matlab Implementation}
-
-\begin{minted}{matlab}
-img = rgb2gray(imread('image.png')); % load
-corners = corner(img, 'Harris', maxNum); % detect corners
-\end{minted}
+\bigskip
+Can be detected reliably in multiple images of same object
+\begin{itemize}
+    \item Used for object detection, structure from motion
+\end{itemize}
 
 \end{frame}
 
@@ -525,82 +305,62 @@ corners = corner(img, 'Harris', maxNum); % detect corners
 
 \begin{frame}
 \frametitle{Interest Point Detection}
-\framesubtitle{SIFT Detector}
+\framesubtitle{SIFT Keypoints}
 
 Scale invariant blob detector
 \begin{itemize}
-	\item A blob is an image region with similar intensity % surrounded by regions with different intensity, again see Tuytelaars08 for more information
+    \item A \emph{blob} is an image region with similar intensity % surrounded by regions with different intensity, again see Tuytelaars08 for more information
 \end{itemize}
 
 \bigskip
 Blob detection accomplished via LoG filtering
 \begin{itemize}
-	\item LoG filter responds to blobs of size that depends on $\sigma$
+    \item LoG filter responds to blobs of size that depends on $\sigma$
 \end{itemize}
 
 \bigskip
 Scale invariance is achieved by
 \begin{itemize}
-	\item Applying LoG filter with multiple $\sigma$
-	\item Finding local maxima in resulting scale-space
+    \item Applying LoG filter with multiple $\sigma$
+    \item Finding local maxima in resulting scale-space
+\end{itemize}
+
+% Repeated LoG approximated by Differences of Gaussians (DoGs)
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Interest Point Detection}
+\framesubtitle{SIFT Scale Space}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=10cm]{figures/sift-scale-space.png}}
+    {\centering Images from \cite{prince12}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Interest Point Detection}
+\framesubtitle{SIFT Keypoints}
+
+Found local maxima are
+\begin{itemize}
+    \item Discarded unless on image corners
+    \item Assigned an orientation via gradient histograms (slide 15) % multiple keypoints are generated if there are more several dominant orientations
 \end{itemize}
 
 \bigskip
-Repeated LoG approximated by Differences of Gaussians (DoGs)
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Interest Point Detection}
-\framesubtitle{SIFT Detector -- Scale Space}
-
 \begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=10cm]{figures/sift-scale-space.png}}
-	{\centering Images from \cite{prince12}}
+    \copyrightbox[b]
+    {\includegraphics[width=4cm]{figures/ip-sift.png}}
+    {\centering Image from \cite{prince12}}
 \end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Interest Point Detection}
-\framesubtitle{SIFT Detector}
-
-Local maxima are
-\begin{itemize}
-	\item Localized to sub-voxel accuracy % via Taylor expansion, which leads to a more accurate position and scale estimation, see Prince's book
-	\item Discarded unless on corners % corners in the above sense, not necessarily actual corners
-	\item Assigned an orientation via gradient histograms % multiple keypoints are generated if there are more several dominant orientations
-\end{itemize}
-
-\begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=4cm]{figures/ip-sift.png}}
-	{\centering Image from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}[fragile]
-\frametitle{Interest Point Detection}
-\framesubtitle{SIFT Detector -- C++ Implementation}
-
-% first argument to sift detector is minimum magnitude of scale-space maxima.
-% second argument to sift detector is the minimum determinant of the Hessian,
-% which is used to discard non-corner keypoints.
-
-\begin{minted}{cpp}
-cv::Mat img = cv::imread("image.png", cv::IMREAD_GRAYSCALE);
-cv::SiftFeatureDetector det(20, 10); // create detector
-std::vector<cv::KeyPoint> kps; // keypoint storage
-det.detect(img, kps); // detect keypoints
-\end{minted}
 
 \end{frame}
 
@@ -613,9 +373,6 @@ Compact representations of contents of an image region\\\medskip
 Usually computed at interest point locations\\\medskip % but dense representations have uses as well
 Invariant in conjunction with suitable interest points\\\medskip % see next slide
 Pool information locally to achieve robustness % wrt. small spatial transformations / tradeoff between preserving spatial information and robustness
-\begin{itemize}
-	\item Often accomplished via histograms
-\end{itemize}
 
 \end{frame}
 
@@ -628,13 +385,14 @@ Pool information locally to achieve robustness % wrt. small spatial transformati
 Computed from gradient histograms\\\medskip
 Usually used together with SIFT interest points
 \begin{itemize}
-	\item Compensate for scale, rotation % by transforming image patch by interest point properties before computing descriptors
+    \item Compensate for scale, rotation % by transforming image patch by interest point properties before computing descriptors
 \end{itemize}
 
+\bigskip
 \begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=6cm]{figures/sift-descriptor.png}} % divide 8x8 pixel grid into 2x2 cells, pool directions in each cell using a histogram with 8 bins (sift uses 16x16 patches and 4x4 cells, so we have 4x4x8=128 values per descriptor, which is then normalized)
-	{\centering Images from \cite{prince12}}
+    \copyrightbox[b]
+    {\includegraphics[width=6cm]{figures/sift-descriptor.png}} % divide 8x8 pixel grid into 2x2 cells, pool directions in each cell using a histogram with 8 bins (sift uses 16x16 patches and 4x4 cells, so we have 4x4x8=128 values per descriptor, which is then normalized)
+    {\centering Images from \cite{prince12}}
 \end{center}
 
 \end{frame}
@@ -647,45 +405,9 @@ Usually used together with SIFT interest points
 
 SIFT descriptors are
 \begin{itemize}
-	\item Invariant to scale and rotation (interest points)
-	\item Invariant to global intensity changes (gradients)
-	\item Robust to small affine transformations (pooling)
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}[fragile]
-\frametitle{Local Descriptors}
-\framesubtitle{SIFT Descriptor -- C++ Implementation}
-
-\begin{minted}{cpp}
-// img and kps from previous example
-cv::Mat descriptors; // storage (n by 128)
-cv::SiftDescriptorExtractor ex; // create extractor
-ex.compute(img, kps, descriptors); // compute descriptors
-\end{minted}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Dimensionality Reduction}
-
-Sometimes desirable to reduce the dimensionality of $\vx$
-\begin{itemize}
-	\item Makes learning and inference more efficient
-	\item Can improve generalization performance % same number of measurements, smaller feature dimensionality can improve generalization performance in absence of regularization
-	\item Facilitates data visualization
-\end{itemize} % see Webb11 for more information
-
-\bigskip
-Goal is to find transformation from $\vx$ to $\vv$
-\begin{itemize}
-	\item With $v=\dim(\vv)<x=\dim(\vx)$
-	\item That minimizes the information loss
+    \item Invariant to scale and rotation (interest points)
+    \item Invariant to global intensity changes (gradients)
+    \item Robust to small affine transformations (pooling)
 \end{itemize}
 
 \end{frame}
@@ -694,25 +416,17 @@ Goal is to find transformation from $\vx$ to $\vv$
 
 \begin{frame}
 \frametitle{Dimensionality Reduction}
-\framesubtitle{Principal Component Analysis}
 
-Principal Component Analysis (PCA) yields
+Reduce the dimensionality of $\vx$ by removing irrelevant features  % more precisely, if we remove features but leave the reset u, c=color, marker='x', cmap=plt.get_cmap('cool')nchanged, we speak of feature selection. if we compute new features, we speak of feature extraction
 \begin{itemize}
-	\item The orthogonal transformation $\phi$ to a $v$-dimensional subspace
-	\item That minimizes $\sum_i\lVert\vx_i-\phi^{-1}\vv_i\rVert_2$ (assuming zero mean) % the squared reconstruction error / transformation is orthogonal so phi is a matrix and phi^-1 = phi^T / note that the notation is the other way around in Prince's book / in practice, zero mean is enforced by subtracting the empirical mean from all x
+    \item Irrelevant means redundant or not discriminative (e.g.\ noise)
 \end{itemize}
 
 \bigskip
-Accomplished if $\phi=[\phi_1,\dots,\phi_v]^T_{v\times x}$ % again, assuming zero mean
+Advantages
 \begin{itemize}
-	\item With $\phi_k$ being the $k$th largest eigenvectors of $\vX\vX^T$
-	\item Where $\vX=[\vx_1,\dots,\vx_I]$
-\end{itemize}
-
-\bigskip
-Projects $\vx_i$ onto hyperplane
-\begin{itemize}
-	\item Spanned by $v$ largest axes of covariance ellipsoid
+    \item We get a better $\vx$ automatically
+    \item Facilitates data visualization  % because we cannot (intuitively) visualize 4+D data
 \end{itemize}
 
 \end{frame}
@@ -721,14 +435,15 @@ Projects $\vx_i$ onto hyperplane
 
 \begin{frame}
 \frametitle{Dimensionality Reduction}
-\framesubtitle{Principal Component Analysis -- Example}
+\framesubtitle{PCA}
 
-In this case $h=v$ and $\phi=\phi^{-1}=\phi^T$
+Assume the following data (30 samples $\vx_1\cdots\vx_{30}$, $\dim(\vx)=2$)
+\begin{itemize}
+    \item Features are highly correlated
+\end{itemize}
 
 \begin{center}
-	\copyrightbox[b]
-	{\includegraphics[width=10cm]{figures/pca.png}} % TODO adapt to text notation
-	{\centering Images from \cite{prince12}}
+\includegraphics[width=4.5cm]{figures/pca-original.pdf}
 \end{center}
 
 \end{frame}
@@ -737,60 +452,102 @@ In this case $h=v$ and $\phi=\phi^{-1}=\phi^T$
 
 \begin{frame}
 \frametitle{Dimensionality Reduction}
-\framesubtitle{Principal Component Analysis -- Remarks}
+\framesubtitle{PCA}
 
-PCA is dependent on the units of $x_i$
-\begin{itemize}
-	\item So standardize (whiten) your data % see beginning of slides
-\end{itemize}
+We want to map the $\vx_k$ to a linear subspace\\\medskip
+Spanned by directions of largest data variation
 
-\bigskip
-PCA is unsupervised and linear
-\begin{itemize}
-	\item Better methods for supervised case (\eg LDA) % check the fisherfaces paper, which illustrates this well
-	\item More powerful non-linear methods (\eg autoencoders)
-	\item But generally superfluous with modern learning methods % SVMs, random forests etc. include means for regularization and feature selection and are thus robust wrt. feature dimension and redundancy
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}[fragile]
-\frametitle{Dimensionality Reduction}
-\framesubtitle{Principal Component Analysis -- Matlab Implementation}
-
-% Matlab assumes that each row is a measurement, we assume each column is one
-
-\begin{minted}{matlab}
-pc = princomp(X'); % compute all principal components (sorted)
-phi = c(:,1:v)'; % keep only v "largest" ones and transpose
-V = phi * X; % project to lower dimension
-Xe = phi' * V % reconstruct X
-\end{minted}
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-original.pdf}
+\end{center}
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Summary}
+\frametitle{Dimensionality Reduction}
+\framesubtitle{PCA}
 
-We utilize IP to obtain $\vx$ from an image
+Standardize individual features (zero mean, unit stddev)\\\medskip  % stddev = standard deviation. stddevs don't have to be 1 but they should be similar, otherwise some features will outweigh others
+Compute covariance matrix $\Sigma$
 \begin{itemize}
-	\item That is for feature extraction
+    \item Eigenvectors $\vu_1,\vu_2$ of $\Sigma$ are sought direction vectors
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-eigenvectors.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Dimensionality Reduction}
+\framesubtitle{PCA}
+
+Represent $\vx_k$ in the $U=(\vu_1,\vu_2)$ basis, $\vx^r_k=U^\top\vx_k$
+\begin{itemize}
+    \item $\vu_1,\vu_2$ are orthogonal, so $U$ is a rotation matrix % because sigma is symmetric
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-rotated.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Dimensionality Reduction}
+\framesubtitle{PCA}
+
+Now we can simply drop features that vary little  % this is visualized here by setting them to 0
+\begin{itemize}
+    \item Encoded by the corresponding eigenvalues $\lambda_1,\lambda_2$
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-reduced.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Dimensionality Reduction}
+\framesubtitle{PCA}
+
+If desired we can approximate $\vx_k$ by multiplying with $U$  % after padding with zeros of course
+
+\begin{center}
+\includegraphics[width=4.5cm]{figures/pca-reconstructed.pdf}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Dimensionality Reduction}
+\framesubtitle{PCA}
+
+This method is called \emph{Principal Component Analysis (PCA)}
+
+\bigskip
+Used to find features that retain e.g.\ 99\% of variance
+\begin{itemize}
+    \item Often leads to a significant dimensionality reduction
 \end{itemize}
 
 \bigskip
-We want $\vx$ to be distinctive, invariant, robust, concise
+Used to perform \emph{whitening} % to do so we simply rotate the x as before and then divide them by the square root of the corresponding eigenvalues. this results in unit variance
 \begin{itemize}
-	\item And we have seen methods to achieve this
-\end{itemize}
-
-\bigskip
-We have only scratched the surface of IP
-\begin{itemize}
-	\item See literature
+    \item To obtain uncorrelated features with same variance % features extracted via pca are uncorrelated as the data were projected onto orthogonal eigenvectors
+    \item Needed by some ML algorithms
 \end{itemize}
 
 \end{frame}

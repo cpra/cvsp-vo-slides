@@ -67,6 +67,8 @@
 % use tuwcvl beamer theme
 \usetheme{tuwcvl}
 
+\usetikzlibrary{arrows}
+
 % -----------------------------------------------------------------------------
 
 % common english abbreviations
@@ -109,7 +111,7 @@
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
-\subtitle{Introduction}
+\subtitle{Introduction to Computer Vision}
 \author{Christopher Pramerdorfer}
 \institute{Computer Vision Lab, Vienna University of Technology}
 
@@ -126,16 +128,15 @@
 \begin{frame}
 \frametitle{Topics}
 
-What is Computer Vision (CV) and why is it important?\\\medskip
+What is \emph{Computer Vision} (CV) and why is it important?\\\medskip
 CV past, present, future\\\medskip
-Relation to other research fields\\\medskip
-Brief image processing recap
+Relation to other research fields
 
 \bigskip
 \begin{center}
     \copyrightbox[b]
     {\includegraphics[width=8cm]{figures/intro-collage.png}}
-    {\centering Images from \cite{prince12}}
+    {\centering Images from \cite{lecun1989}, \cite{shotton2011}, \cite{taigman2013}}
 \end{center}
 
 \end{frame}
@@ -166,6 +167,19 @@ Key to novel autonomous systems (cars, security, data analysis)\\\medskip
 Tremendous progress in last decades, but still unsolved
 
 \end{frame}
+
+% -----------------------------------------------------------------------------
+
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+
+\begin{tikzpicture}[remember picture,overlay]
+\fill[white] (current page.north west) rectangle (current page.south east);
+\end{tikzpicture}
+
+\end{frame}
+}
 
 % -----------------------------------------------------------------------------
 
@@ -478,13 +492,8 @@ Segmentation, context, motion, emotions
 \setbeamertemplate{footline}{}
 \begin{frame}
 
-% show one of my photos as a filler just to break up the presentation to indicate a new chapter
-
 \begin{tikzpicture}[remember picture,overlay]
-    \node[at=(current page.center)] {
-        \includegraphics[width=\paperwidth]{figures/dead-sea.jpg}
-    };
-    \node[at=(current page.center),align=center,yshift=-4cm,gray] {\footnotesize Dead Sea, Jordan, 2014};
+\fill[white] (current page.north west) rectangle (current page.south east);
 \end{tikzpicture}
 
 \end{frame}
@@ -504,6 +513,27 @@ In other lectures you probably heard about
 
 \bigskip
 Let's see how CV and these fields are related
+\begin{itemize}
+    \item Using an example application for explanation purposes
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{CV and Related Fields}
+\framesubtitle{Example Application}
+
+We want to distinguish two kinds of fish in images
+\begin{itemize}
+    \item Each image contains exactly one fish
+    \item Only fishes of two known kinds (e.g.\ sea bass and salmon) % from Duda's book
+    \item Little background clutter
+\end{itemize}
+
+\bigskip
+This is a binary (two-class) \emph{image classification} problem
 
 \end{frame}
 
@@ -528,33 +558,49 @@ So in mathematical terms CV is about
 
 \begin{frame}
 \frametitle{CV and Related Fields}
+\framesubtitle{Example Application}
+
+$w$ encodes what we care about, the fish type
+\begin{itemize}
+    \item Let $w=0$ if the image depicts a sea bass
+    \item Let $w=1$ if the image depicts a salmon
+\end{itemize}
+
+\bigskip
+What are our measurements $\vx$?
+\begin{itemize}
+    \item We could simply use the whole image
+    \item But we should be able to come up with something better
+    \item This is where image processing comes in
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{CV and Related Fields}
 \framesubtitle{Image Processing}
 
 We use \emph{image processing} to extract $\vx$ from images
 \begin{itemize}
     \item Preprocessing step for CV
-    \item Different problems favor different $\vx$
 \end{itemize}
 
-\end{frame}
+\bigskip
+Different problems favor different features $\vx$
 
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{CV and Related Fields}
-\framesubtitle{Image Processing}
-
-Example: scene category classification
+\bigskip
+Do sea basses and salmons look differently?
 \begin{itemize}
-    \item $\vx$ : histogram of SIFT visual words
-    \item $w$ : scene class label (e.g.\ desert, jungle)
+    \item $\vx$ should encode fish appearance
 \end{itemize}
 
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=6cm]{figures/visual-words.jpg}}
-    {\centering Image from \cite{prince12}}
-\end{center}
+\bigskip
+Do they differ in size?
+\begin{itemize}
+    \item $\vx$ should encode fish size
+\end{itemize}
 
 \end{frame}
 
@@ -564,34 +610,26 @@ Example: scene category classification
 \frametitle{CV and Related Fields}
 \framesubtitle{Statistics}
 
-CV is about inferring some world state $\vw$ from measurements $\vx$
+How do we get from $\vx$ to $\vw$?
+\begin{itemize}
+    \item This is what CV is all about!
+\end{itemize}
 
 \bigskip
-And thus about describing the relationship between $\vx$ and $\vw$
+CV is about describing the relationship between $\vx$ and $\vw$
 \begin{itemize}
     \item This relationship is called \emph{model}
 \end{itemize}
 
 \bigskip
-Models are ideally statistical (probabilistic)
+Put simply, there are two ways for \emph{modeling} this relationship
 \begin{itemize}
-    \item Allow us to reason about uncertainty
+    \item Statistically by looking at data and using domain knowledge
+    \item Using a generic machine learning algorithm
 \end{itemize}
 
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{CV and Related Fields}
-\framesubtitle{Statistics}
-
-Statistical analysis can help select a suitable model % especially for low feature dimensionalities
-
 \bigskip
-\begin{center}
-\includegraphics[width=6cm]{figures/perceptron-classification.pdf} % in this example a visualization of x and w suggests that the two classes are linearly separated apart from noise and a few outliers, so a linear model would be a good choice
-\end{center}
+More on models later
 
 \end{frame}
 
@@ -601,22 +639,13 @@ Statistical analysis can help select a suitable model % especially for low featu
 \frametitle{CV and Related Fields}
 \framesubtitle{Mathematics}
 
-\bigskip
-A model usually has two kinds of \emph{parameters}
-\begin{itemize}
-    \item \emph{Hyperparameters} that are set manually
-    \item Parameters $\pv$ that are \emph{learned} from data
-\end{itemize}
+Models are mathematical functions $\Gamma:\vx\mapsto\vw$ % i just use gamma here but this is just a personal choice
 
 \bigskip
-Learning involves finding a $\pv$ that
+Models have parameters that are \emph{learned} from data
 \begin{itemize}
-    \item Minimizes the disagreement (\emph{loss}) between $\dot{\vw}$ and $\vw$ % average loss. this is often not possible because finding the global minimum can be impractical. good local minima often suffice though. the loss function must be defined depending on the task
-    \item Given \emph{training samples} $\{(\vx,\dot{\vw})\}$ and predictions $\vw=\Gamma(\vx;\pv)$ % in the supervised case, but let's skip these details for
+    \item This is a \emph{mathematical optimization} problem
 \end{itemize}
-
-\bigskip
-This is a \emph{mathematical optimization} problem
 
 \end{frame}
 
@@ -633,520 +662,12 @@ This is a \emph{mathematical optimization} problem
 \end{itemize}
 
 \bigskip
-CV often makes use of generic ML algorithms (e.g.\ SVM) % unless we know the physical relationship between x and v e.g. structure from motion, tracking with sensor noise
+Generic ML algorithms (e.g.\ SVM) are often used as the model % unless we know the physical relationship between x and v e.g. structure from motion, tracking with sensor noise
 
 \bigskip
 Strictly speaking, models and algorithms are not the same
 \begin{itemize}
     \item More on this later
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-{
-\setbeamertemplate{footline}{}
-\begin{frame}
-
-% show one of my photos as a filler just to break up the presentation to indicate a new chapter
-
-\begin{tikzpicture}[remember picture,overlay]
-    \node[at=(current page.center)] {
-        \includegraphics[width=\paperwidth]{figures/wadi-mujib.jpg}
-    };
-    \node[at=(current page.center),align=center,yshift=-4cm,white] {\footnotesize Wadi Mujib, Jordan, 2014};
-\end{tikzpicture}
-
-\end{frame}
-}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-
-We use Image Processing (IP) to extract a suitable $\vx$ from images
-\begin{itemize}
-    \item IP has great influence on CV performance
-\end{itemize}
-
-\bigskip
-Suitable means
-\begin{itemize}
-    \item \emph{Distinctive} features % like the two features in the above graph
-    \item That are \emph{invariant} and \emph{robust}
-\end{itemize}
-
-\bigskip
-Such features vary significantly (only) with $w$
-\begin{itemize}
-    \item So different problems favor different $\vx$
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-
-More on feature selection later
-
-\bigskip
-Let's recap some generic IP methods for
-\begin{itemize}
-    \item Gaining robustness to noise
-    \item Detecting brightness changes
-    \item Detecting interest points in images
-    \item Describing image patches in an invariant way
-    \item Dimensionality reduction
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Noise Reduction}
-
-Gain robustness to noise via blurring
-
-\bigskip
-Often accomplished via \emph{linear filtering}
-\begin{itemize}
-    \item Pixel values linear combination of neighbor values
-    \item Computed via \emph{convolution} (or correlation) with kernel $h$
-\end{itemize}
-
-\[
-f'(x,y) = \sum_{i,j}f(x-i,y-j)h(i,j) % with convolution the kernel is flipped (x-i,y-j), with correlation this is not the case (x+i,y+j) ... most IP kernels are symmetric so the result is the same
-\]
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Noise Reduction}
-
-For blurring use a 2D Gaussian as kernel $h$: % there are of course others as well
-\[
-h(i,j)=\frac{1}{2\pi\sigma^2}\exp\left(-\frac{i^2+j^2}{2\sigma^2}\right)
-\]
-
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=8cm]{figures/linear-blur.png}}
-    {\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Detecting Brightness Changes -- LoG Filter}
-
-Brightness changes can be valuable information
-\begin{itemize}
-    \item Object boundaries, textured regions
-\end{itemize}
-
-\bigskip
-Use a Laplacian of Gaussian (LoG) filter as kernel $h$ % for 3x3 this is just [0 -1 0 ; -1 4 -1 ; 0 -1 0]
-\begin{itemize}
-    \item Gaussian for noise reduction
-    \item Laplacian approximates $\nabla^2=f_{xx}+f_{yy}$ % sum of second unmixed derivatives of image
-\end{itemize}
-
-\bigskip
-LoG filters respond to intensity changes % strong response near corners, zero crossing on corners
-\begin{itemize}
-    \item Regardless of direction
-    \item At a frequency defined by $\sigma$ of Gaussian
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Detecting Brightness Changes -- LoG Filter}
-
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=7cm]{figures/linear-log.png}}
-    {\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Detecting Brightness Changes -- Gabor Filter}
-
-Direction of brightness changes can be valuable information
-\begin{itemize}
-    \item Texture information
-\end{itemize}
-
-\bigskip
-Use a Gabor filter as kernel $h$, which consists of
-\begin{itemize}
-    \item A Gaussian for noise reduction
-    \item A Sinusoid for change detection 
-\end{itemize}
-
-\bigskip
-Gabor filters respond to intensity changes at a
-\begin{itemize}
-    \item Phase and orientation defined by the Sinusoid % phase, orientation, wavelength, but can be made independent of phase by summing squared responses of two filters with pi/2 phase shift
-    \item Frequency defined by the Gaussian and Sinusoid
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Detecting Brightness Changes -- Gabor Filter}
-
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=10cm]{figures/linear-gabor.png}}
-    {\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Interest Point Detection}
-
-\emph{Interest points} (keypoints) are
-\begin{itemize}
-    \item Distinctive locations in images
-    \item Invariant and robust to image transformations % depending on the type of keypoint
-\end{itemize}
-
-\bigskip
-Can be detected reliably in multiple images of same object
-\begin{itemize}
-    \item Used for object detection, structure from motion
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Interest Point Detection -- Harris}
-
-Corners characterized by intensity change in multiple directions
-
-\bigskip
-Harris corner detector exploits this by
-\begin{itemize}
-    \item Checking gradient distribution in local neighborhood
-    \item Corner: gradient distribution has two large eigenvalues
-\end{itemize}
-
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=10cm]{figures/cornerness.png}}
-    {\centering Images from \cite{szeliski2010}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Interest Point Detection -- Harris}
-
-Harris interest points
-\begin{itemize}
-    \item Are invariant to translation and rotation
-    \item Stable under varying lighting conditions % because they are based on derivatives
-\end{itemize} % they are also among the most repeatable and most informative, see Tuytelaars08
-
-\medskip
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=8cm]{figures/ip-harris.png}}
-    {\centering Images from \cite{tuytelaars2008}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Interest Point Detection -- SIFT}
-
-Scale invariant blob detector
-\begin{itemize}
-    \item A blob is an image region with similar intensity % surrounded by regions with different intensity, again see Tuytelaars08 for more information
-\end{itemize}
-
-\bigskip
-Blob detection accomplished via LoG filtering
-\begin{itemize}
-    \item LoG filter responds to blobs of size that depends on $\sigma$
-\end{itemize}
-
-\bigskip
-Scale invariance is achieved by
-\begin{itemize}
-    \item Applying LoG filter with multiple $\sigma$
-    \item Finding local maxima in resulting scale-space
-\end{itemize}
-
-\bigskip
-Repeated LoG approximated by Differences of Gaussians (DoGs)
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Interest Point Detection -- SIFT Scale Space}
-
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=10cm]{figures/sift-scale-space.png}}
-    {\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Interest Point Detection -- SIFT}
-
-Local maxima are
-\begin{itemize}
-    \item Localized to sub-voxel accuracy % via Taylor expansion, which leads to a more accurate position and scale estimation, see Prince's book
-    \item Discarded unless on corners % corners in the above sense, not necessarily actual corners
-    \item Assigned an orientation via gradient histograms % multiple keypoints are generated if there are more several dominant orientations
-\end{itemize}
-
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=4cm]{figures/ip-sift.png}}
-    {\centering Image from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Local Descriptors}
-
-Compact representations of contents of an image region\\\medskip
-Usually computed at interest point locations\\\medskip % but dense representations have uses as well
-Invariant in conjunction with suitable interest points\\\medskip % see next slide
-Pool information locally to achieve robustness % wrt. small spatial transformations / tradeoff between preserving spatial information and robustness
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Local Descriptors -- SIFT}
-
-Computed from gradient histograms\\\medskip
-Usually used together with SIFT interest points
-\begin{itemize}
-    \item Compensate for scale, rotation % by transforming image patch by interest point properties before computing descriptors
-\end{itemize}
-
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=6cm]{figures/sift-descriptor.png}} % divide 8x8 pixel grid into 2x2 cells, pool directions in each cell using a histogram with 8 bins (sift uses 16x16 patches and 4x4 cells, so we have 4x4x8=128 values per descriptor, which is then normalized)
-    {\centering Images from \cite{prince12}}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Local Descriptors -- SIFT}
-
-SIFT descriptors are
-\begin{itemize}
-    \item Invariant to scale and rotation (interest points)
-    \item Invariant to global intensity changes (gradients)
-    \item Robust to small affine transformations (pooling)
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Dimensionality Reduction}
-
-Reduce the dimensionality of $\vx$ by removing irrelevant features  % more precisely, if we remove features but leave the reset u, c=color, marker='x', cmap=plt.get_cmap('cool')nchanged, we speak of feature selection. if we compute new features, we speak of feature extraction
-\begin{itemize}
-    \item Irrelevant means redundant or not discriminative (e.g.\ noise)
-\end{itemize}
-
-\bigskip
-Advantages
-\begin{itemize}
-    \item Makes learning and inference more efficient  % because we have less data
-    \item Can improve generalization performance  % because we can avoid/limit the effects of the curse of dimensionality
-    \item Facilitates data visualization  % because we cannot (intuitively) visualize 4+D data
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Dimensionality Reduction -- PCA}
-
-Assume the following data (30 samples $\vx_1\cdots\vx_{30}$, $\dim(\vx)=2$)
-\begin{itemize}
-    \item Features are highly correlated
-\end{itemize}
-
-\begin{center}
-\includegraphics[width=5cm]{figures/pca-original.pdf}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Dimensionality Reduction -- PCA}
-
-We want to map the $\vx_k$ to a linear subspace\\\medskip
-Spanned by directions of largest data variation
-
-\begin{center}
-\includegraphics[width=4.5cm]{figures/pca-original.pdf}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Dimensionality Reduction -- PCA}
-
-Standardize individual features (zero mean, unit stddev)\\\medskip  % stddev = standard deviation. stddevs don't have to be 1 but they should be similar, otherwise some features will outweigh others
-Compute covariance matrix $\Sigma$
-\begin{itemize}
-    \item Eigenvectors $\vu_1,\vu_2$ of $\Sigma$ are sought direction vectors
-\end{itemize}
-
-\begin{center}
-\includegraphics[width=4.5cm]{figures/pca-eigenvectors.pdf}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Dimensionality Reduction -- PCA}
-
-Represent $\vx_k$ in the $U=(\vu_1,\vu_2)$ basis, $\vx^r_k=U^\top\vx_k$
-\begin{itemize}
-    \item $\vu_1,\vu_2$ are orthogonal, so $U$ is a rotation matrix % because sigma is symmetric
-\end{itemize}
-
-\begin{center}
-\includegraphics[width=4.5cm]{figures/pca-rotated.pdf}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Dimensionality Reduction -- PCA}
-
-Now we can simply drop features that vary little  % this is visualized here by setting them to 0
-\begin{itemize}
-    \item Encoded by the corresponding eigenvalues $\lambda_1,\lambda_2$
-\end{itemize}
-
-\begin{center}
-\includegraphics[width=4.5cm]{figures/pca-reduced.pdf}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Dimensionality Reduction -- PCA}
-
-If desired we can approximate $\vx_k$ by multiplying with $U$  % after padding with zeros of course
-
-\begin{center}
-\includegraphics[width=4.5cm]{figures/pca-reconstructed.pdf}
-\end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Image Processing Recap}
-\framesubtitle{Dimensionality Reduction -- PCA}
-
-This method is called \emph{Principal Component Analysis (PCA)}
-
-\bigskip
-Used to find features that retain e.g.\ 99\% of variance
-\begin{itemize}
-    \item Often leads to a significant dimensionality reduction
-\end{itemize}
-
-\bigskip
-Used to perform \emph{whitening} % to do so we simply rotate the x as before and then divide them by the square root of the corresponding eigenvalues. this results in unit variance
-\begin{itemize}
-    \item To obtain uncorrelated features with same variance % features extracted via pca are uncorrelated as the data were projected onto orthogonal eigenvectors
-    \item Needed by some ML algorithms
-\end{itemize}
-
-\bigskip
-PCA is unsupervised (no $\dot{\vw}$ required) and linear
-\begin{itemize}
-    \item There are more powerful supervised / non-linear methods
 \end{itemize}
 
 \end{frame}

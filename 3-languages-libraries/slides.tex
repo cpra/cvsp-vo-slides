@@ -41,9 +41,6 @@
 \usepackage{fontspec}
 \setmonofont[Scale=0.7]{Cousine} % part of ttf-chromeos fonts on Arch
 
-% improve microtypography
-\usepackage{microtype}
-
 % multi-language quotes for babel
 \usepackage{csquotes}
 
@@ -56,6 +53,10 @@
 % language support (english,ngerman)
 \usepackage[english]{babel}
 
+% minted screws up line spacings ...
+\usepackage{setspace}
+\usepackage{enumitem}
+
 % -----------------------------------------------------------------------------
 
 % specify PDF metadata
@@ -64,17 +65,24 @@
 % copyright font style
 \makeatletter\renewcommand{\CRB@setcopyrightfont}{\tiny\color{lightgray}}
 
-% make emph bold
-\DeclareTextFontCommand{\emph}{\bfseries}
+% add bib file
+\addbibresource{literature.bib}
 
 % use tuwcvl beamer theme
 \usetheme{tuwcvl}
 
-% add bib file
-\addbibresource{literature.bib}
+% add some space between lines
+\setstretch{1.4}
 
-% smileys :)
-\newfontfamily\DejaSans{DejaVu Sans}
+% but not for minted environments
+\AtBeginEnvironment{minted}{\singlespacing}
+
+% fix itemize
+
+\setlist{nolistsep}
+\setitemize{itemsep=-1mm,label=\usebeamerfont*{itemize item}%
+  \usebeamercolor[fg]{itemize item}
+  \usebeamertemplate{itemize item}}
 
 % -----------------------------------------------------------------------------
 
@@ -110,6 +118,9 @@
 \newcommand{\vy}{\vec{y}}
 \newcommand{\vz}{\vec{z}}
 
+% highlight
+\newcommand{\highlight}[1]{\textcolor{tuwcvl_inf_red}{\textbf{#1}}}
+
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
@@ -132,13 +143,13 @@
 
 Characteristics of Computer Vision (CV) programming
 \begin{itemize}
-	\item Implications on language choice
+	\item Implications on programming language choice
 \end{itemize}
 
-\bigskip
-Which language is the best? {\DejaSans 😇}
+\medskip
+Which language is the best?
 
-\bigskip
+\medskip
 Overview of popular languages and libraries
 \begin{itemize}
 	\item Matlab
@@ -146,7 +157,7 @@ Overview of popular languages and libraries
 	\item C++
 \end{itemize}
 
-\bigskip
+\medskip
 Suggestions on language selection
 
 \end{frame}
@@ -163,13 +174,13 @@ We often start with Image Processing (IP)
 	\item Feature extraction
 \end{itemize}
 
-\bigskip
+\medskip
 Involves operations on arrays / matrices
 
-\bigskip
+\medskip
 Many IP operations are local and sequential
 \begin{itemize}
-	\item Favors languages with fast random access to pixels % don't code loops in matlab should sound familiar
+	\item Favors languages with fast random access to pixels % "don't code loops in matlab" should sound familiar
 \end{itemize}
 
 \end{frame}
@@ -178,12 +189,12 @@ Many IP operations are local and sequential
 
 \begin{frame}
 \frametitle{Characteristics of CV Programming}
-\framesubtitle{Many IP Operations are Local and Sequential}
+\framesubtitle{Many IP Operations Are Local and Sequential}
 
-Resampling is independent for each pixel\\\medskip
+Image resampling is done independently for each pixel\\ % in the target image
 Involves some form of local interpolation
 
-\bigskip
+\medskip
 \begin{center}
 	\includegraphics[width=8cm]{figures/resampling.png}
 \end{center}
@@ -194,9 +205,9 @@ Involves some form of local interpolation
 
 \begin{frame}
 \frametitle{Characteristics of CV Programming}
-\framesubtitle{Many IP Operations are Local and Sequential}
+\framesubtitle{Many IP Operations Are Local and Sequential}
 
-Local neighborhood operators such as linear filtering:
+Local neighborhood operations such as linear filtering:
 \[
  f'(x,y)=\sum_{i,j}f(x+i,y+j)\,h(i,j)
 \]
@@ -218,14 +229,14 @@ Local neighborhood operators such as linear filtering:
 
 More generally, CV programming is all about numbers
 
-\bigskip
+\medskip
 Often, there are many of them
 \begin{itemize}
 	\item BD stream: $\sim$ 50 million/sec % 1920*1080*24
-	\item Large optimization problems (\eg bundle adjustment) \\ \url{https://www.youtube.com/watch?v=HrgHFDPJHXo}
+	\item Large optimization problems
 \end{itemize}
 
-\bigskip
+\medskip
 Some languages are better at crunching numbers than others
 \begin{itemize}
 	\item Faster, more memory-efficient
@@ -237,9 +248,9 @@ Some languages are better at crunching numbers than others
 
 \begin{frame}
 \frametitle{Characteristics of CV Programming}
-\framesubtitle{Does efficiency matter?}
+\framesubtitle{Does Speed and Efficiency Matter?}
 
-But does efficiency matter?
+It depends!
 \begin{itemize}
 	\item Researchers often don't care % but sometimes they do - for example training convnets can take weeks even on GPUs - would not be feasible without heavy software optimization
 	\item Companies usually do % run more analysis channels on a the same machine = money saved
@@ -259,21 +270,20 @@ But does efficiency matter?
 
 \begin{frame}
 \frametitle{Characteristics of CV Programming}
-\framesubtitle{Does efficiency matter?}
+\framesubtitle{Does Speed and Efficiency Matter?}
 
-\emph{It depends}
-
-\bigskip
 Design choices can have a bigger impact than language
 \begin{itemize}
 	\item Use appropriate data structures
 	\item Utilize multiple CPU cores, GPUs
 \end{itemize}
 
-\bigskip
+\medskip
 Language bottlenecks can be avoided by switching language
 \begin{itemize}
-	\item Implement parts in C, call from Matlab, Python
+	\item Interpreted languages are slow \enquote{at the pixel level} % loops over pixels
+	\item Implement such parts in C, call from Matlab, Python
+	\item Use higher-level functions (\texttt{mean}, \texttt{imfilter}) % that are themselves written in c
 \end{itemize}
 
 \end{frame}
@@ -282,20 +292,19 @@ Language bottlenecks can be avoided by switching language
 
 \begin{frame}
 \frametitle{Choosing a Programming Language}
+\framesubtitle{Other Factors}
 
-In summary, efficiency is often of little concern in research
-
-\bigskip
-There are other factors
+There are other important factors in language selection
 \begin{itemize}
 	\item Ease of development (language features, libraries, IDEs)
 	\item OS and platform support % does it run on all OS? does it run on ARM like the odroid shown below?
 	\item License fees % matlab is 2000 euros as of oct 2014
 \end{itemize}
 
+\medskip
 \begin{center}
 	\copyrightbox[b]
-	{\includegraphics[width=4cm]{figures/odroid-u3.jpg}}
+	{\includegraphics[width=4.5cm]{figures/odroid-u3.jpg}}
 	{\centering Image from \url{pixhawk.org}}
 \end{center}
 
@@ -306,14 +315,14 @@ There are other factors
 \begin{frame}
 \frametitle{Choosing a Programming Language}
 
-\emph{There is no \enquote{best} language}, it depends
+So there is no \textit{best} language, it depends
 \begin{itemize}
 	\item On the task at hand % pedestrian detection ...
 	\item On the operating conditions % for a paper? speed usually not important / for use in cars? different story!
 \end{itemize}
 
-\bigskip
-Let's take a look at some popular languages and libraries ...
+\medskip
+Let's take a look at some popular languages and libraries
 
 \end{frame}
 
@@ -346,9 +355,9 @@ Let's take a look at some popular languages and libraries ...
 \begin{columns}
 \column{0.65\textwidth}
 
-Numerical computing environment \\\medskip
-Commercial software (student licenses)\\\medskip
-Widely used in academics \\\medskip
+Numerical computing environment \\
+Commercial software (student licenses)\\
+Widely used in academics \\
 Used in many courses at TU Wien
 
 \column{0.25\textwidth}
@@ -375,7 +384,7 @@ Pros
 	\item Many high-quality toolboxes
 \end{itemize}
 
-\bigskip
+\medskip
 Cons
 \begin{itemize}
 	\item Not as fast/efficient from scratch as C++ % code is fast if vectorized, but that can be tedious work
@@ -394,9 +403,9 @@ Cons
 \begin{columns}
 \column{0.65\textwidth}
 
-General-purpose programming language \\\medskip
-Free and open source\\\medskip % This applies to the Cython reference implementation
-No IP/CV functionality by default \\\medskip
+General-purpose programming language \\
+Free and open source\\ % This applies to the Cython reference implementation
+No IP/CV functionality by default \\
 But great open-source libraries
 
 \column{0.25\textwidth}
@@ -424,7 +433,7 @@ Pros
 	\item Free and open source
 \end{itemize}
 
-\bigskip
+\medskip
 Cons
 \begin{itemize}
 	\item Not as integrated as Matlab
@@ -444,10 +453,10 @@ Cons
 
 Fundamental numerical computing library
 
-\bigskip
-Arrays and matrices\\\medskip
-Linear algebra\\\medskip
-Matrix decompositions\\\medskip % svd, qr, cholesky
+\medskip
+Arrays and matrices\\
+Linear algebra\\
+Matrix decompositions\\ % svd, qr, cholesky
 Fourier analysis
 
 \column{0.25\textwidth}
@@ -473,9 +482,9 @@ Fourier analysis
 
 Family of scientific computing packages % like numpy, matplotlib
 
-\bigskip
-Optimization\\\medskip
-Image processing\\\medskip % linear filtering, morphology, distance transform, segmentation
+\medskip
+Optimization\\
+Image processing\\ % linear filtering, morphology, distance transform, segmentation
 Statistics \& density estimation
 
 \column{0.25\textwidth}
@@ -501,10 +510,10 @@ Statistics \& density estimation
 
 Image processing library
 
-\bigskip
-Image transforms\\\medskip
-Image filtering\\\medskip
-Feature extraction\\\medskip
+\medskip
+Image transforms\\
+Image filtering\\
+Feature extraction\\
 Segmentation % e.g. graphcut, watershed
 
 \column{0.25\textwidth}
@@ -530,10 +539,10 @@ Segmentation % e.g. graphcut, watershed
 
 Comprehensive machine learning library
 
-\bigskip
-Classification\\\medskip
-Regression\\\medskip
-Clustering\\\medskip
+\medskip
+Classification\\
+Regression\\
+Clustering\\
 Dimensionality reduction
 
 \column{0.25\textwidth}
@@ -552,6 +561,35 @@ Dimensionality reduction
 
 \begin{frame}
 \frametitle{Popular CV Programming Languages}
+\framesubtitle{Python -- Keras}
+
+\begin{columns}
+\column{0.65\textwidth}
+
+Deep learning library
+
+\medskip
+Multilayer Perceptrons \\
+Convolutional Neural Networks \\
+Recurrent Neural Networks \\
+CPU and GPU using CUDA
+
+\column{0.25\textwidth}
+
+\begin{center}
+{\copyrightbox[b]
+	{\includegraphics[width=2.6cm]{figures/keras-logo.jpg}}
+	{\centering Image from \url{keras.io}}}
+\end{center}
+
+\end{columns}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Popular CV Programming Languages}
 \framesubtitle{Python -- matplotlib}
 
 \begin{columns}
@@ -559,8 +597,8 @@ Dimensionality reduction
 
 Graph plotting library
 
-\bigskip
-Surface, wireframe, scatter, bar plots\\\medskip
+\medskip
+Surface, wireframe, scatter, bar plots\\
 Matlab-like syntax
 
 \column{0.25\textwidth}
@@ -584,9 +622,9 @@ Matlab-like syntax
 \begin{columns}
 \column{0.65\textwidth}
 
-General-purpose programming language\\\medskip
-Focus on performance and efficiency\\\medskip
-No IP/CV functionality by default\\\medskip
+General-purpose programming language\\
+Focus on performance and efficiency\\
+No IP/CV functionality by default\\
 But great open-source libraries
 
 \column{0.25\textwidth}
@@ -613,7 +651,7 @@ Pros
 	\item Free and open source
 \end{itemize}
 
-\bigskip
+\medskip
 Cons
 \begin{itemize}
 	\item Harder to learn and master
@@ -631,15 +669,18 @@ Cons
 \begin{columns}
 \column{0.65\textwidth}
 
-Comprehensive IP/CV library\\\medskip
+Comprehensive IP/CV library\\
 Designed for real-time applications
 
-\bigskip
-Matrices and linear algebra\\\medskip
-Image transforms and filtering\\\medskip
-Feature extraction and matching\\\medskip
-Stereo, structure from motion\\\medskip
+\medskip
+Matrices and linear algebra\\
+Image transforms and filtering\\
+Feature extraction and matching\\
+Stereo, structure from motion\\
 Machine learning % boosting, trees, em, nn, svms, forests
+
+\medskip
+Matlab and Python bindings available
 
 \column{0.25\textwidth}
 
@@ -657,29 +698,21 @@ Machine learning % boosting, trees, em, nn, svms, forests
 
 \begin{frame}
 \frametitle{Popular CV Programming Languages}
-\framesubtitle{C++ -- Shark, Caffe}
+\framesubtitle{C++ -- Caffe}
 
-\begin{columns}
-\column{0.65\textwidth}
+Deep learning library
 
-Machine learning libraries
+\medskip
+Multilayer Perceptrons \\
+Convolutional Neural Networks \\
+CPU and GPU using CUDA
 
-\bigskip
-Optimization\\\medskip
-Regression\\\medskip
-Classification\\\medskip
-Dimensionality reduction\\\medskip
-Deep learning
+\medskip
+Trained models available (model zoo)\\
+Used by e.g.\ Nvidia, Google
 
-\column{0.25\textwidth}
-
-\begin{center}
-{\copyrightbox[b]
-	{\includegraphics[width=2.3cm]{figures/shark-logo.png}}
-	{\centering Image from \url{image.diku.dk}}}
-\end{center}
-
-\end{columns}
+\medskip
+Matlab and Python bindings available
 
 \end{frame}
 
@@ -694,7 +727,7 @@ Deep learning
 
 Graph plotting library
 
-\bigskip
+\medskip
 Surface, wireframe, scatter, bar plots
 
 \column{0.25\textwidth}
@@ -717,15 +750,12 @@ Surface, wireframe, scatter, bar plots
 
 Comparable functionality
 \begin{itemize}
-	\item There are libraries for most CV tasks in all these languages
+	\item Libraries for most CV tasks available
 	\item This applies to other languages as well
 \end{itemize}
 
-\bigskip
+\medskip
 Many libraries have language bindings
-\begin{itemize}
-	\item Python and Matlab bindings for OpenCV
-\end{itemize}
 
 \end{frame}
 
@@ -748,7 +778,8 @@ Task is to load, blur, show, and save an image
 img = imread('image.png'); % read
 kernel = fspecial('gaussian', [5 5]); % blur
 blur = imfilter(img, kernel); % blur
-imshow(blur); % show
+imshow(blur); % display
+pause(5); % wait
 imwrite(blur, 'blur.png'); % save
 \end{minted}
 
@@ -763,8 +794,8 @@ imwrite(blur, 'blur.png'); % save
 \begin{minted}{python}
 img = skimage.io.imread('image.png') # read
 blur = skimage.filter.gaussian_filter(img, sigma=1.7) # blur
-skimage.io.imshow(blur) # show
-skimage.io.show() # show
+skimage.io.imshow(blur) # display
+skimage.io.show() # wait
 skimage.io.imsave('blur.png', blur) # save
 \end{minted}
 
@@ -780,8 +811,8 @@ skimage.io.imsave('blur.png', blur) # save
 cv::Mat img = cv::imread("image.png"); // read
 cv::Mat blur; // blur
 cv::GaussianBlur(img, blur, cv::Size(5, 5), 0); // blur
-cv::imshow("blur", blur); // show
-cv::waitKey(0); // show
+cv::imshow("blur", blur); // display
+cv::waitKey(0); // wait
 cv::imwrite("blur.png", blur); // save
 \end{minted}
 
@@ -794,12 +825,18 @@ cv::imwrite("blur.png", blur); // save
 
 Similar programming effort in the example case
 
-\bigskip
+\medskip
 For many larger CV tasks
 \begin{itemize}
 	\item Matlab requires least effort
 	\item Closely followed by Python
 	\item Not so closely followed by C++
+\end{itemize}
+
+\medskip
+Depends on the problem of course
+\begin{itemize}
+	\item Libraries available?
 \end{itemize}
 
 \end{frame}
@@ -816,11 +853,11 @@ In summary, the discussed languages
 	\item Differ in ease of development, licensing fees
 \end{itemize}
 
-\bigskip
+\medskip
 So, to conclude
 \begin{itemize}
-	\item There is \emph{no best CV language}
-	\item \emph{Different tasks favor different languages}
+	\item There is no best CV language
+	\item Different tasks favor different languages
 \end{itemize}
 
 \end{frame}
@@ -832,13 +869,14 @@ So, to conclude
 
 Know the strengths and weaknesses of different languages
 
-\bigskip
+\medskip
 Be proficient in more than one language
 \begin{itemize}
 	\item Allows you to select appropriate language for task at hand
+	\item E.g.\ prototype in Matlab/Python, ship in C++
 \end{itemize}
 
-\bigskip
+\medskip
 Learn C++
 \begin{itemize}
 	\item Modern C++ is not a bad language if used correctly

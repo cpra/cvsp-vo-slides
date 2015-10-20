@@ -121,6 +121,10 @@
 % highlight
 \newcommand{\highlight}[1]{\textcolor{tuwcvl_inf_red}{\textbf{#1}}}
 
+% make emph red
+\let\oldemph\emph
+\renewcommand\emph[1]{\textcolor{tuwcvl_inf_red}{#1}}
+
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
@@ -250,7 +254,7 @@ Some languages are better at crunching numbers than others
 \frametitle{Characteristics of CV Programming}
 \framesubtitle{Does Speed and Efficiency Matter?}
 
-It depends!
+\emph{It depends!}
 \begin{itemize}
 	\item Researchers often don't care % but sometimes they do - for example training convnets can take weeks even on GPUs - would not be feasible without heavy software optimization
 	\item Companies usually do % run more analysis channels on a the same machine = money saved
@@ -315,7 +319,7 @@ There are other important factors in language selection
 \begin{frame}
 \frametitle{Choosing a Programming Language}
 
-So there is no \textit{best} language, it depends
+So there is \emph{no best language}, it depends
 \begin{itemize}
 	\item On the task at hand % pedestrian detection ...
 	\item On the operating conditions % for a paper? speed usually not important / for use in cars? different story!
@@ -887,6 +891,9 @@ Learn C++
 \end{frame}
 
 % -----------------------------------------------------------------------------
+
+\setstretch{1}
+\renewcommand\emph[1]{\oldemph{#1}}
 
 \begin{frame}
 \frametitle{Bibliography}

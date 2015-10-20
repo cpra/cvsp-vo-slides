@@ -106,6 +106,10 @@
 % highlight
 \newcommand{\highlight}[1]{\textcolor{tuwcvl_inf_red}{\textbf{#1}}}
 
+% make emph red
+\let\oldemph\emph
+\renewcommand\emph[1]{\textcolor{tuwcvl_inf_red}{#1}}
+
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
@@ -126,7 +130,7 @@
 \begin{frame}
 \frametitle{Topics}
 
-Brief \emph{Image Processing} (IP) recap\\\medskip
+Brief \emph{Image Processing} (\emph{IP}) recap\\\medskip
 Assuming you are already familiar with it
 
 \bigskip
@@ -167,7 +171,7 @@ Let's recap some basic IP methods
 
 Used for many low-level tasks\\\medskip
 Pixel values are linear combination of neighbor values\\\medskip
-Computed via \emph{convolution} (or correlation) with kernel $h$ \\\medskip
+Computed via \emph{convolution} (or correlation) with \emph{kernel} $h$ \\\medskip
 Different responses depending on kernel
 
 \bigskip
@@ -287,7 +291,7 @@ Gabor filters respond to intensity changes at a
 \begin{frame}
 \frametitle{Interest Point Detection}
 
-\emph{Interest points} (keypoints) are
+\emph{Interest points} (\emph{keypoints}) are
 \begin{itemize}
     \item Distinctive locations in images
     \item Invariant and robust to image transformations % depending on the type of keypoint
@@ -535,7 +539,7 @@ If desired we can approximate $\vx_k$ by multiplying with $U$  % after padding w
 \frametitle{Dimensionality Reduction}
 \framesubtitle{PCA}
 
-This method is called \emph{Principal Component Analysis (PCA)}
+This method is called \emph{Principal Component Analysis} (\emph{PCA})
 
 \bigskip
 Used to find features that retain e.g.\ 99\% of variance
@@ -553,6 +557,8 @@ Used to perform \emph{whitening} % to do so we simply rotate the x as before and
 \end{frame}
 
 % -----------------------------------------------------------------------------
+
+\renewcommand\emph[1]{\oldemph{#1}}
 
 \begin{frame}
 \frametitle{Bibliography}

@@ -106,6 +106,10 @@
 % highlight
 \newcommand{\highlight}[1]{\textcolor{tuwcvl_inf_red}{\textbf{#1}}}
 
+% make emph red
+\let\oldemph\emph
+\renewcommand\emph[1]{\textcolor{tuwcvl_inf_red}{#1}}
+
 % -----------------------------------------------------------------------------
 
 \title{Computer Vision Systems Programming VO}
@@ -126,7 +130,7 @@
 \begin{frame}
 \frametitle{Topics}
 
-What is \emph{Computer Vision} (CV) and why is it important?\\\medskip
+What is \emph{Computer Vision} (\emph{CV}) and why is it important?\\\medskip
 CV past, present, future\\\medskip
 Relation to other research fields
 
@@ -637,7 +641,7 @@ More on models later
 \frametitle{CV and Related Fields}
 \framesubtitle{Mathematics}
 
-Models are mathematical functions $\Gamma:\vx\mapsto\vw$ % i just use gamma here but this is just a personal choice
+Models are mathematical functions
 
 \bigskip
 Models have parameters that are \emph{learned} from data
@@ -653,7 +657,7 @@ Models have parameters that are \emph{learned} from data
 \frametitle{CV and Related Fields}
 \framesubtitle{Machine Learning}
 
-\emph{Machine Learning} (ML) studies techniques for learning from data
+\emph{Machine Learning} (\emph{ML}) studies techniques for learning from data
 \begin{itemize}
     \item Namely algorithms for learning and inference
     \item So any CV model that involves learning is a ML technique
@@ -671,6 +675,8 @@ Strictly speaking, models and algorithms are not the same
 \end{frame}
 
 % -----------------------------------------------------------------------------
+
+\renewcommand\emph[1]{\oldemph{#1}}
 
 \begin{frame}[allowframebreaks=0.9]
 \frametitle{Bibliography}

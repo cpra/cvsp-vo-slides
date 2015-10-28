@@ -148,7 +148,7 @@
 \frametitle{Topics}
 
 Introduction to object recognition \\
-Specific object recognition (rigid, nonrigid)
+Specific object recognition
 
 \bigskip
 \begin{center}
@@ -292,10 +292,11 @@ Instances of same category can look very differently
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
 
-We want to detect specific planar objects (e.g. markers, books)
+We want to detect specific rigid planar objects
 \begin{itemize}
+    \item Like markers, books
 	\item Comparatively easy problem
 \end{itemize}
 
@@ -303,8 +304,8 @@ We want to detect specific planar objects (e.g. markers, books)
 Challenges
 \begin{itemize}
 	\item Unknown object pose and scale
-	\item Partial occlusions
-	\item Illumination
+	\item Varying illumination
+    \item Partial occlusions
 \end{itemize}
 
 \end{frame}
@@ -312,7 +313,7 @@ Challenges
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
 
 \begin{center}
     \copyrightbox[b]
@@ -325,34 +326,37 @@ Challenges
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
 \framesubtitle{Selecting $\vx$ and $\vw$}
 
 Our problem formulation is  % this is what is used normally because it is very flexible
 \begin{itemize}
 	\item Given a pixel location in a query image
-	\item Predict location in reference image of sought object  % will be out of bounds inf the original pixel location does not lie on the object
+	\item Predict location on object surface  % the unit will depend on the problem, like cm for pose estimation
 \end{itemize}
 
 \bigskip
 So we know how to select $\vx$ and $\vw$
 \begin{itemize}
-	\item $\vx=(x,y)$ : location in query image
-	\item $\vw=(u,v)$ : corresponding location in reference image
+	\item $\vx=(x,y)$ : pixel location in query image
+	\item $\vw=(u,v)$ : corresponding location on object surface
 \end{itemize}
+
+\bigskip
+As $\vw\in\RR^2$ this is a \emph{regression problem}
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
 \framesubtitle{Selecting $\vx$ and $\vw$}
 
 \begin{center}
     \copyrightbox[b]
-    {\includegraphics[width=10cm]{figures/book-xw.jpg}}
-    {\centering Image from \cite{prince12}}
+    {\includegraphics[width=10cm]{figures/book-pose.pdf}}
+    {\centering Image adapted from \cite{prince12}}
 \end{center}
 
 \end{frame}
@@ -360,7 +364,7 @@ So we know how to select $\vx$ and $\vw$
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
 \framesubtitle{Model Selection}
 
 Images of planar objects are always related by a \emph{homography} $\boldsymbol{\Phi}$
@@ -386,10 +390,10 @@ In homogeneous coordinates this means that
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
 \framesubtitle{Model Selection}
 
-The model of choice is thus (disregarding noise)
+The model of choice is thus (disregarding noise)  % using Gamma below to represent the model as a function for next slide. this choice is arbitrary 
 \[
 	\vw=\Gamma(\vx)=
 	\begin{pmatrix}
@@ -410,12 +414,12 @@ The model of choice is thus (disregarding noise)
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
 \framesubtitle{Learning Model Parameters}
 
-We again learn parameters $\bth$ from samples $\{\vx_i,\vw_i\}_{i=1}^n$
+We again learn parameters $\bth$ from samples $\{(\vx_i,\vw_i)\}_{i=1}^n$
 \begin{itemize}
-	\item $\bth$ contains 9 parameters comprising $\boldsymbol{\Phi}$
+	\item $\bth$ contains 9 parameters comprising $\boldsymbol{\Phi}$ % but 8 unknowns due to arbitrary scaling factor. we thus need n=4 points to find the parameters (if there is no noise)
 \end{itemize}
 
 \bigskip
@@ -433,7 +437,7 @@ Usually no exact solution because of noisy $\vx_i$
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
 \framesubtitle{Learning Model Parameters}
 
 This least squares approach is optimal
@@ -453,12 +457,179 @@ This is a nonlinear optimization problem
 % -----------------------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Specific Planar Object Detection}
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Pose Estimation}
 
-But how can we compute $\{\vx_i,\vw_i\}_{i=1}^n$ automatically?
+$\boldsymbol{\Phi}$ is a 2D transformation
+
+\bigskip
+We may want to know the position and orientation of the object % or the position and orientation of the camera relative to the object
 \begin{itemize}
-	\item Next lecture
+    \item This is called \emph{pose estimation}
+    \item Required e.g.\ for marker-based AR like above
 \end{itemize}
+
+\bigskip
+This information can be extracted from $\boldsymbol{\Phi}$
+\begin{itemize}
+    \item If we know the intrinsic camera parameters % this can also be expressed by a 3x3 matrix
+    \item See \cite{prince12} for details % if interested ... not required for the exam
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences}
+
+How can we compute $\{(\vx_i,\vw_i)\}_{i=1}^n$ automatically?
+\begin{itemize}
+    \item We first select $\vw_i$, then search corresponding $\vx_i$
+\end{itemize}
+
+\bigskip
+$\vw_i$ can be selected
+\begin{itemize}
+    \item Manually (e.g.\ specific corners on markers)
+    \item Automatically (e.g.\ SIFT)
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences}
+
+We adopt the second approach and use SIFT (or similar)
+\begin{itemize}
+    \item Features invariant to rotation, scale, illumination % this is nice given the challenges discussed
+    \item Robust to affine transformations % to some extent. there are more suitable alternatives if there are strong transformations (like if we view the object from a sharp angle)
+\end{itemize}
+
+\bigskip
+Approach
+\begin{itemize}
+    \item Compute keypoints and descriptors in both images
+    \item Match descriptors (e.g.\ nearest neighbor association)
+    \item Use keypoint locations of matches as $\{(\vx_i,\vw_i)\}_{i=1}^n$
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences -- Remarks}
+
+There will likely be incorrect matches
+\begin{itemize}
+    \item Would greatly impact the least squares solution
+    \item Hence we use a robust alternative like RANSAC
+\end{itemize}
+
+\bigskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=9cm]{figures/ransac.pdf}}
+    {\centering Image adapted from \cite{prince12}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences Using OpenCV}
+
+\footnotesize
+\begin{minted}{cpp}
+// read images (SIFT expects grayscale images)
+cv::Mat object = cv::imread("object.jpg", cv::IMREAD_GRAYSCALE);
+cv::Mat search = cv::imread("search.jpg", cv::IMREAD_GRAYSCALE);
+
+cv::SIFT sift; // using default arguments here
+
+// compute keypoints
+std::vector<cv::KeyPoint> kobject, ksearch;
+sift.detect(object, kobject); sift.detect(search, ksearch);
+
+// compute descriptors
+cv::Mat dobject, dsearch;
+sift.compute(object, kobject, dobject); sift.compute(search, ksearch, dsearch);
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences Using OpenCV}
+
+\footnotesize
+\begin{minted}{cpp}
+// find two nearest neighbors x,x' for each w
+cv::FlannBasedMatcher matcher; // fast nearest neighbor search
+std::vector<std::vector<cv::DMatch> > kMatches;
+matcher.knnMatch(dobject, dsearch, kMatches, 2);
+
+// keep match (x,w) if x is clearly more similar than x'
+// this is a popular matching strategy
+std::vector<cv::DMatch> matches;
+for(const std::vector<cv::DMatch>& match : kMatches)
+    if(match[0].distance < match[1].distance * 0.8) // x, x'
+        matches.push_back(match[0]); // (x,w)
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Learning Homography Parameters Using OpenCV}
+
+\footnotesize
+\begin{minted}{cpp}
+// collect feature locations of correspondences from before
+std::vector<cv::Point2f> pobject, psearch;
+for(const cv::DMatch& match : matches) { 
+    pobject.push_back(kobject.at(match.queryIdx).pt);
+    psearch.push_back(ksearch.at(match.trainIdx).pt);
+}
+
+// estimate homography using RANSAC for robustness
+cv::Mat inliers; // contains indices of valid correspondences
+cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 2, inliers);
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+
+\begin{tikzpicture}[remember picture,overlay]
+\fill[white] (current page.north west) rectangle (current page.south east);
+\end{tikzpicture}
+
+\end{frame}
+}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+
+What if sought objects are not planar?
 
 \end{frame}
 

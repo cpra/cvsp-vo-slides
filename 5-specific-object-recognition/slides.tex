@@ -119,6 +119,7 @@
 \newcommand{\vz}{\vec{z}}
 
 \newcommand{\bth}{\boldsymbol{\theta}}
+\newcommand{\intr}{\boldsymbol{\Lambda}}
 
 % highlight
 \newcommand{\highlight}[1]{\textcolor{tuwcvl_inf_red}{\textbf{#1}}}
@@ -314,11 +315,29 @@ Challenges
 
 \begin{frame}
 \frametitle{Planar Rigid Object Detection}
+\framesubtitle{Application: Marker-Based AR}
 
 \begin{center}
     \copyrightbox[b]
     {\includegraphics[width=7cm]{figures/marker-ar.jpg}}
     {\centering Image from \href{https://www.youtube.com/watch?v=ChGW2Jogdjs}{\texttt{youtube.com}}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Application: Panorama Stitching}
+
+Assuming that object is far away (on \textit{plane at infinity})  % or if the camera undergoes a pure rotation
+
+\medskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=6cm]{figures/panorama-stitching.jpg}}
+    {\centering Image adapted from \cite{brown2007}}
 \end{center}
 
 \end{frame}
@@ -504,7 +523,7 @@ $\vw_i$ can be selected
 \frametitle{Planar Rigid Object Detection}
 \framesubtitle{Obtaining Point Correspondences}
 
-We adopt the second approach and use SIFT (or similar)
+We opt for the second approach and use SIFT (or similar)
 \begin{itemize}
     \item Features invariant to rotation, scale, illumination % this is nice given the challenges discussed
     \item Robust to affine transformations % to some extent. there are more suitable alternatives if there are strong transformations (like if we view the object from a sharp angle)
@@ -629,7 +648,153 @@ cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 2, inliers)
 \begin{frame}
 \frametitle{Nonplanar Rigid Object Detection}
 
-What if sought objects are not planar?
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=9cm]{figures/rigid-object-detection.jpg}} % note the occlusions and transformations
+    {\centering Image adapted from \cite{lowe2004}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+
+We use the same problem formulation as before
+\begin{itemize}
+    \item Given a pixel location in an image $\vx$
+    \item Predict location on (nonplanar) object surface $\vw$
+\end{itemize}
+
+\bigskip
+As object is no longer planar, we have $\vw=(u,v,w)$
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Pinhole Camera Model}
+
+How are $\vx$ and $\vw$ related in this case?
+\begin{itemize}
+    \item Let's recap the \emph{pinhole camera model} % we always assume this even though this is a simplification
+\end{itemize}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/image-formation.pdf}} % the pinhole camera model usually places the image plane in front of the pinhole for convenience, even though that's not physically possible.
+    {\centering Image from \cite{szeliski2010}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Pinhole Camera Model}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=9cm]{figures/pinhole-model.pdf}} % the model in the image is simplified in the sense that the camera is centered at the origin of the world coordinate system and because there is no skew
+    {\centering Image adapted from \cite{prince12}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Pinhole Camera Model}
+
+% this applies only if the camera center is at the origin of the world coordinate system in which the object (and our w) resides, and if the image plane is parallel to the (u,v) plane. see next slide.
+
+We see that in homogeneous coordinates % like before this is linear in homogeneous coordinates. it also looks similar, we just have a new coordinate w
+\[
+\lambda
+\begin{pmatrix}
+    x \\ y \\ 1
+\end{pmatrix} =
+\begin{pmatrix}
+    f & 0 & p_x & 0 \\ 0 & f & p_y & 0 \\ 0 & 0 & 1 & 0
+\end{pmatrix}
+\begin{pmatrix}
+    u \\ v \\ w \\ 1
+\end{pmatrix}
+\]
+
+$f$ is the focal length in pixels \\
+$p_x,p_y$ are the principal point coordinates
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Pinhole Camera Model}
+
+World and camera coordinate systems generally differ
+\begin{itemize}
+    \item Transform $\vw$ to camera coordinates before projection
+\end{itemize}
+
+\[
+    \vw' =
+    \begin{pmatrix}
+        u' \\ v' \\ w'
+    \end{pmatrix} =
+    \begin{pmatrix}
+        \omega_{11} & \omega_{12} & \omega_{13} \\
+        \omega_{21} & \omega_{22} & \omega_{23} \\
+        \omega_{31} & \omega_{32} & \omega_{33} \\
+    \end{pmatrix}
+    \begin{pmatrix}
+        u \\ v \\ w
+    \end{pmatrix} +
+    \begin{pmatrix}
+        \tau_u \\ \tau_v \\ \tau_w
+    \end{pmatrix}
+\]
+
+\medskip
+$\tau$ encode translation, $\omega$ encode rotation
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Pinhole Camera Model}
+
+We combine this for the full pinhole camera model
+\begin{itemize}
+    \item Standard camera model in Computer Vision
+\end{itemize}
+
+\[
+\lambda
+\begin{pmatrix}
+    x \\ y \\ 1
+\end{pmatrix} =
+\begin{pmatrix}
+    f & 0 & p_x & 0 \\ 0 & f & p_y & 0 \\ 0 & 0 & 1 & 0
+\end{pmatrix}
+    \begin{pmatrix}
+        \omega_{11} & \omega_{12} & \omega_{13} & \tau_u \\
+        \omega_{21} & \omega_{22} & \omega_{23} & \tau_v \\
+        \omega_{31} & \omega_{32} & \omega_{33} & \tau_w \\
+        0 & 0 & 0 & 1
+    \end{pmatrix}
+\begin{pmatrix}
+    u \\ v \\ w \\ 1
+\end{pmatrix}
+\]
 
 \end{frame}
 

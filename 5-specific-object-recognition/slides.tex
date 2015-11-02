@@ -118,6 +118,9 @@
 \newcommand{\vy}{\vec{y}}
 \newcommand{\vz}{\vec{z}}
 
+\newcommand{\vE}{\vec{E}}
+\newcommand{\vF}{\vec{F}}
+
 \newcommand{\bth}{\boldsymbol{\theta}}
 \newcommand{\intr}{\boldsymbol{\Lambda}}
 
@@ -351,14 +354,14 @@ Assuming that object is far away (on \textit{plane at infinity})  % or if the ca
 Our problem formulation is  % this is what is used normally because it is very flexible
 \begin{itemize}
 	\item Given a pixel location in a query image
-	\item Predict location on object surface  % the unit will depend on the problem, like cm for pose estimation
+	\item Predict location on object surface (image or world)  % the unit will depend on the problem, like cm if we are interested in measuring or pose estimation, or pixels if we want to perform detection (in this case we have a second image)
 \end{itemize}
 
 \bigskip
 So we know how to select $\vx$ and $\vw$
 \begin{itemize}
 	\item $\vx=(x,y)$ : pixel location in query image
-	\item $\vw=(u,v)$ : corresponding location on object surface
+	\item $\vw=(u,v)$ : corresponding location on object surface % if we operate in world coordinates, we simply assume that the `depth' coordinate of the object to 0 everywhere as it is flat
 \end{itemize}
 
 \bigskip
@@ -482,7 +485,7 @@ This is a nonlinear optimization problem
 $\boldsymbol{\Phi}$ is a 2D transformation
 
 \bigskip
-We may want to know the position and orientation of the object % or the position and orientation of the camera relative to the object
+Where is the object in the world? % or the position and orientation of the camera relative to the object
 \begin{itemize}
     \item This is called \emph{pose estimation}
     \item Required e.g.\ for marker-based AR like above
@@ -492,7 +495,6 @@ We may want to know the position and orientation of the object % or the position
 This information can be extracted from $\boldsymbol{\Phi}$
 \begin{itemize}
     \item If we know the intrinsic camera parameters % this can also be expressed by a 3x3 matrix
-    \item See \cite{prince12} for details % if interested ... not required for the exam
 \end{itemize}
 
 \end{frame}
@@ -541,7 +543,7 @@ Approach
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}
+\begin{frame}\label{homography-ransac}
 \frametitle{Planar Rigid Object Detection}
 \framesubtitle{Obtaining Point Correspondences -- Remarks}
 
@@ -645,7 +647,7 @@ cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 2, inliers)
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}
+\begin{frame}\label{sift-object-detection}
 \frametitle{Nonplanar Rigid Object Detection}
 
 \begin{center}
@@ -660,6 +662,33 @@ cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 2, inliers)
 
 \begin{frame}
 \frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Stereo}
+
+\begin{center}
+\includegraphics[width=10cm]{figures/opencv-stereo.jpg}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Structure from Motion}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/dubrovnik.jpg}} % we can cast sfm as an object detection problem as well!
+    {\centering Image from \url{https://www.youtube.com/watch?v=sQegEro5Bfo}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Selecting $\vx$ and $\vw$}
 
 We use the same problem formulation as before
 \begin{itemize}
@@ -669,6 +698,9 @@ We use the same problem formulation as before
 
 \bigskip
 As object is no longer planar, we have $\vw=(u,v,w)$
+\begin{itemize}
+    \item Location in another image can be computed easily % which is why we assume that w is in the world here
+\end{itemize}
 
 \end{frame}
 
@@ -676,13 +708,14 @@ As object is no longer planar, we have $\vw=(u,v,w)$
 
 \begin{frame}
 \frametitle{Nonplanar Rigid Object Detection}
-\framesubtitle{Pinhole Camera Model}
+\framesubtitle{Model Selection}
 
-How are $\vx$ and $\vw$ related in this case?
+In this case $\vx$ and $\vw$ are related by the \emph{pinhole camera model}
 \begin{itemize}
-    \item Let's recap the \emph{pinhole camera model} % we always assume this even though this is a simplification
+    \item Generalization of the homography model % which assumes w=0 as the object is planar
 \end{itemize}
 
+\medskip
 \begin{center}
     \copyrightbox[b]
     {\includegraphics[width=7cm]{figures/image-formation.pdf}} % the pinhole camera model usually places the image plane in front of the pinhole for convenience, even though that's not physically possible.
@@ -695,7 +728,7 @@ How are $\vx$ and $\vw$ related in this case?
 
 \begin{frame}
 \frametitle{Nonplanar Rigid Object Detection}
-\framesubtitle{Pinhole Camera Model}
+\framesubtitle{Model Selection}
 
 \begin{center}
     \copyrightbox[b]
@@ -709,7 +742,7 @@ How are $\vx$ and $\vw$ related in this case?
 
 \begin{frame}
 \frametitle{Nonplanar Rigid Object Detection}
-\framesubtitle{Pinhole Camera Model}
+\framesubtitle{Model Selection}
 
 % this applies only if the camera center is at the origin of the world coordinate system in which the object (and our w) resides, and if the image plane is parallel to the (u,v) plane. see next slide.
 
@@ -727,8 +760,11 @@ We see that in homogeneous coordinates % like before this is linear in homogeneo
 \end{pmatrix}
 \]
 
-$f$ is the focal length in pixels \\
-$p_x,p_y$ are the principal point coordinates
+With the \emph{intrinsic parameters} % this is simplified but commonly used
+\begin{itemize}
+    \item $f$ : focal length in pixels
+    \item $p_x,p_y$ : principal point coordinates
+\end{itemize}
 
 \end{frame}
 
@@ -736,7 +772,7 @@ $p_x,p_y$ are the principal point coordinates
 
 \begin{frame}
 \frametitle{Nonplanar Rigid Object Detection}
-\framesubtitle{Pinhole Camera Model}
+\framesubtitle{Model Selection}
 
 World and camera coordinate systems generally differ
 \begin{itemize}
@@ -762,21 +798,21 @@ World and camera coordinate systems generally differ
 \]
 
 \medskip
-$\tau$ encode translation, $\omega$ encode rotation
+The \emph{extrinsic parameters} $\tau$ and $\omega$ encode translation and rotation
 
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
-\begin{frame}
+\begin{frame}[label={pinhole-cam-model}]
 \frametitle{Nonplanar Rigid Object Detection}
-\framesubtitle{Pinhole Camera Model}
+\framesubtitle{Model Selection}
 
 We combine this for the full pinhole camera model
 \begin{itemize}
     \item Standard camera model in Computer Vision
 \end{itemize}
-
+\vspace{1.5em}
 \[
 \lambda
 \begin{pmatrix}
@@ -800,10 +836,322 @@ We combine this for the full pinhole camera model
 
 % -----------------------------------------------------------------------------
 
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Learning Model Parameters}
+
+We again learn the parameters from samples $\{(\vx_i,\vw_i)\}_{i=1}^n$
+\begin{itemize}
+    \item Using RANSAC and least squares like before
+    \item OpenCV has own functions \texttt{solvePnP}, \texttt{solvePnPRansac}
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences}
+
+Assume we have two images of the object \\
+Let $\vx_1,\vx_2$ be the projections of $\vw$ in these images
+
+\bigskip
+Assume we know the camera parameters (Slide~\ref{pinhole-cam-model}) but not $\vw$ \\ % for both cameras
+In this case $\vx_2$ must lie on the \emph{epipolar line} of $\vx_1$ (and vice versa)
+
+\bigskip
+Points on this line fulfill $\tilde{\vx}_2^\top\vE\,\tilde{\vx}_1=0$
+\begin{itemize}
+    \item Here $\tilde{\vx}_i$ is $\vx_i$ in homogeneous coordinates
+    \item $\vE$ is called \emph{essential matrix} (encode extrinsic relationship)
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/epipolar-geometry.pdf}}
+    {\centering Image adapted from \cite{prince12}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences}
+
+We can now proceed as follows
+\begin{itemize}
+    \item Select points $\{\vx^i_1\}_{i=1}^n$ (every pixel, keypoint locations)
+    \item For each $\vx^i_1$, search for $\vx^i_2$ on the epipolar line of $\vx^i_1$ % based on pixel (patch) or descriptor similarity
+    \item If we have $\vx^i_2$, we can compute $\vw_i$ via \emph{triangulation}
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=6.5cm]{figures/triangulation.pdf}}
+    {\centering Image adapted from \cite{prince12}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences}
+
+This is the typical \emph{stereo} pipeline for 3D reconstruction
+
+\bigskip
+\begin{minted}{python}
+# dense stereo in OpenCV (Python), left and right are rectified
+imgL = cv2.pyrDown(cv2.imread('left.jpg'))
+imgR = cv2.pyrDown(cv2.imread('right.jpg'))
+stereo = cv2.StereoSGBM(...) # args depend on images
+disparity = stereo.compute(imgL, imgR)
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Obtaining Point Correspondences}
+
+But what if we do not know the camera parameters?
+\begin{itemize}
+    \item Why we wanted to compute $\{(\vx_i,\vw_i)\}_{i=1}^n$ in the first place
+\end{itemize}
+
+\bigskip
+If we know only the intrinsics, we can estimate the extrinsics
+
+\bigskip
+If not, we can estimate the \emph{fundamental matrix} $\vF$
+\begin{itemize}
+    \item Corresponding points must fulfill $\tilde{\vx}_2^\top\vF\,\tilde{\vx}_1=0$
+    \item Metric reconstruction of $\vw$ no longer possible % only up to a scale factor
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Remarks}
+
+With 3 or more images we can estimate all parameters and $\vw$ % like with sfm above
+
+\bigskip
+Camera parameters and $\vw$ influence each other
+\begin{itemize}
+    \item We want to jointly optimize all parameters and all $\vw$
+    \item This technique is called \emph{bundle adjustment}
+\end{itemize}
+
+\bigskip
+Lecture 183.129 has more 3D vision
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Remarks}
+
+We have treated 3D reconstruction as an object detection problem
+\begin{itemize}
+    \item Somewhat unorthodox but fits in nicely
+\end{itemize}
+
+\bigskip
+This approach to object detection is powerful but has limitations
+\begin{itemize}
+    \item Slow, less robust if images are very dissimilar (Slide~\ref{sift-object-detection})
+    \item Alternatives more popular if \enquote{coarse} detection suffices % like bounding boxes
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+
+\begin{tikzpicture}[remember picture,overlay]
+\fill[white] (current page.north west) rectangle (current page.south east);
+\end{tikzpicture}
+
+\end{frame}
+}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
+
+What about \textit{general} specific object recognition?
+\begin{itemize}
+    \item Living things are neither planar nor rigid
+\end{itemize}
+
+\medskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=5.5cm]{figures/cat.jpg}}
+    {\centering Image from \url{attackofthecute.com}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
+\framesubtitle{Constellation Models}
+
+\emph{Constellation models} can be used for this
+\begin{itemize}
+    \item Describe object as set of parts and their spatial relations
+\end{itemize}
+
+\medskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=4.75cm]{figures/constellation-model.png}}
+    {\centering Image from \cite{fischler1973}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
+\framesubtitle{Constellation Models}
+
+We first select $\vx$ and $\vw$
+\begin{itemize}
+    \item $\vx$ : features encoding the appearance of part $i$ % here we can use whatever we like
+    \item $\vw=(u,v)$ : location of part $i$ in the image
+\end{itemize}
+
+\bigskip
+We define a generative probabilistic model
+\begin{itemize}
+    \item $\Pr(\vx_i|\vw_i)$ encodes appearance information
+    \item $\Pr(\vw_i|\vw_j)$ encodes spatial information
+\end{itemize}
+
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
+\framesubtitle{Constellation Models}
+
+And the overall probability as (assuming $n$ parts)
+\[
+    \Pr(\vx_1,\dots,\vx_n|\vw_1,\dots,\vw_n) = \prod_{i=1}^n \Pr(\vx_i|\vw_i)\, \prod_{j,k}\Pr(\vw_j|\vw_k)
+\]
+
+Finally we again
+\begin{itemize}
+    \item Specify the distributions $\Pr(\vx_i|\vw_i)$ and $\Pr(\vw_i|\vw_j)$ % usually we use normal distributions here
+    \item Learn the parameters $\bth$ from training data % this can be done independently for each factor 
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
+\framesubtitle{Constellation Models}
+
+This overall distribution is hard to compute
+
+\bigskip
+So we draw samples instead
+\begin{itemize}
+    \item For each part $i$ find locations $\vw$ for which $\Pr(\vx_i|\vw_i)>t_i$
+    \item Evaluate the overall distribution for all combinations $\vw_j,\vw_k$
+    \item Pick the $\vw_1\cdots\vw_n$ with the maximum likelihood % likelihood is the probability value of the above P(X|W)
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
+\framesubtitle{Constellation Models -- Remarks}
+
+This blows up quickly
+\begin{itemize}
+    \item With $m$ candidate locations per part we have $O(m^n)$
+    \item But if the relation graph is acyclic this reduces to $O(m^2n)$
+\end{itemize}
+
+\bigskip
+Work well if shape change is limited
+\begin{itemize}
+    \item Not for cats, but for faces, upright human bodies
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
+\framesubtitle{Convolutional Neural Networks (CNNs)}
+
+If we have lots of data, CNNs often perform best
+\begin{itemize}
+    \item We will cover CNNs in next lecture
+\end{itemize}
+
+\bigskip
+Outperform humans (!) in \emph{face verification}
+\begin{itemize}
+    \item Given two images, do they depict same person?
+    \item Important for HCI, security applications
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
 \setstretch{1}
 \renewcommand\emph[1]{\oldemph{#1}}
 
-\begin{frame}
+\begin{frame}[allowframebreaks=0.9]
 \frametitle{Bibliography}
 
 \printbibliography

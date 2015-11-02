@@ -1031,6 +1031,26 @@ What about \textit{general} specific object recognition?
 
 \begin{frame}
 \frametitle{Nonplanar Nonrigid Object Detection}
+\framesubtitle{Face Recognition}
+
+Classic CV problem : recognize depicted person
+
+\medskip
+\begin{center}
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=3cm]{figures/me.jpg}};
+    \begin{scope}[x={(image.south east)},y={(image.north west)}]
+        \node [red] at (0.5,0.05) {\small ID: Christopher Pramerdorfer};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
 \framesubtitle{Constellation Models}
 
 \emph{Constellation models} can be used for this

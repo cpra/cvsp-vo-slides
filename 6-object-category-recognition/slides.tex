@@ -292,6 +292,83 @@ Popular and can work well, but no longer state of the art % for this reason, thi
 
 % -----------------------------------------------------------------------------
 
+\begin{frame}[fragile]
+\frametitle{Scene Classification}
+\framesubtitle{Bag of Visual Words Using OpenCV}
+
+\footnotesize
+
+\begin{minted}{cpp}
+// init SIFT
+cv::Ptr<cv::FeatureDetector> kp = cv::FeatureDetector::create("SIFT");
+cv::Ptr<cv::DescriptorExtractor> desc = cv::DescriptorExtractor::create("SIFT");
+
+// compute visual words from training data
+const int k = 50; // number of visual words
+cv::BOWKMeansTrainer trainer(k);
+
+for(const cv::Mat& im : images) { // std::vector of training images
+    std::vector<cv::KeyPoint> keypoints; kp->detect(im, keypoints);
+    cv::Mat descriptors; desc->compute(im, keypoints, descriptors);
+    trainer.add(descriptors);
+}
+
+cv::Mat visualWords = trainer.cluster(); // k*128 (SIFT dimension)
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Scene Classification}
+\framesubtitle{Bag of Visual Words Using OpenCV}
+
+\footnotesize
+
+\begin{minted}{cpp}
+// setup visual word frequency (our x) extractor
+cv::Ptr<cv::DescriptorMatcher> fm = cv::makePtr<cv::BFMatcher>(cv::NORM_L2);
+cv::BOWImgDescriptorExtractor extractor(desc, fm);
+extractor.setVocabulary(visualWords);
+
+// compute x for all training images
+cv::Mat xTrain(images.size(), k, CV_32FC1);
+for(std::size_t i = 0; i != images.size(); i++) {
+    std::vector<cv::KeyPoint> keypoints; kp->detect(images[i], keypoints);
+    cv::Mat x; extractor.compute(images[i], keypoints, x);
+    xTrain(cv::Rect(0, i, k, 1)) = x;
+}
+
+// and corresponding w
+cv::Mat wTrain(images.size(), 1, CV_32FC1); // fill me
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Scene Classification}
+\framesubtitle{Bag of Visual Words Using OpenCV}
+
+\footnotesize
+
+\begin{minted}{cpp}
+// train our model (we use an SVM)
+CvSVM svm;
+svm.train(xTrain, wTrain);
+
+// now we can predict the class of new images
+std::vector<cv::KeyPoint> keypoints; kp->detect(newImage, keypoints);
+cv::Mat x; extractor.compute(newImage, keypoints, x);
+float w = svm.predict(x); // predicted class label
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
 {
 \setbeamertemplate{footline}{}
 \begin{frame}
@@ -313,20 +390,6 @@ Popular and can work well, but no longer state of the art % for this reason, thi
     {\includegraphics[width=7cm]{figures/camera-faces.jpg}}
     {\centering Image from \url{olympus-europa.com}}
 \end{center}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Face Detection}
-
-Many applications
-\begin{itemize}
-    \item Smart cameras (autofocus on faces)
-    \item Security (preprocessing step to face recognition)
-    \item Augmented reality
-\end{itemize}
 
 \end{frame}
 
@@ -359,9 +422,234 @@ We don't know where the faces are so we % could be 0, could be 10, arbitrary pos
 
 \begin{frame}
 \frametitle{Face Detection}
+\framesubtitle{Selecting $\vx$}
 
-Many windows, so computing $\vx$ and $\Pr(w|\vx)$ must be fast \\
-We focus on the popular method from \cite{viola2001}
+Which are good features for this task?
+
+\bigskip
+Must be fast to compute (many windows) \\
+Must be robust to illumination, so we use gradient information % because we assume a general unconstrained setting
+
+\bigskip
+Different approaches to encoding gradient information
+\begin{itemize}
+    \item Compute gradients, pool orientations in blocks (e.g.\ SIFT) % weighted by magnitude
+    \item Use a collection of Gabor filters % we briefly covered those in an earlier lecture
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Face Detection}
+\framesubtitle{Selecting $\vx$}
+
+We want something faster
+\begin{itemize}
+    \item So we use a \enquote{blocky} approximation of Gabor filters
+    \item Difference between rectangular subwindows (\emph{Haar features})
+    \item Can be computed in constant time using integral images
+\end{itemize}
+
+\medskip
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=5cm]{figures/haar-features.png}}
+    {\centering Image adapted from \cite{prince12}}
+\end{center}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Face Detection}
+\framesubtitle{Selecting $\vx$}
+
+Computing a Haar feature yields a scalar $f_i$ \\
+We define $\vx=(x_1,\dots,x_I)$ with $x_i=\text{heaviside}(f_i-t_i)$ % heaviside step function returns 0 if f_i-t_i < 0, else 1
+
+\bigskip
+$I$ is very large (but finite)
+\begin{itemize}
+    \item Different Haar features, subwindow locations, $t_i$
+    \item We thus learn which features $x_i$ work best
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Face Detection}
+\framesubtitle{Boosting}
+
+We model $\Pr(w|\vx)$ as a weighted sum of a feature subset
+\[
+    \Pr(w|\vx) \propto a = \phi_0+\sum_k \phi_k\, x_k \qquad (1\leq k\leq I)
+\]
+And learn the parameters $\bth=(\phi_0,\phi_k,x_k)$ from training samples
+\begin{itemize}
+    \item For each $x_k$ in a large precomputed set
+    \item Find optimal $\phi_0,\phi_k$
+    \item Add best $x_k$ to sum and repeat
+\end{itemize}
+
+\bigskip
+This incremental approach is called \emph{boosting}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Face Detection}
+\framesubtitle{Boosting}
+
+We stop adding features at some point
+\begin{itemize}
+    \item If the classification error no longer decreases
+    \item After a specified maximum number of iterations
+\end{itemize}
+
+\bigskip
+We end up with $K$ good features, $K\ll I$
+\begin{itemize}
+    \item For prediction we compute only these $K$ features
+    \item We stop if $P(w=0)>t$ after processing $J\ll K$ features % this is optional and inaccurate but makes detection extremely fast as we only have to compute a few features for non-face regions
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Face Detection}
+\framesubtitle{Boosting}
+
+If we don't care about probabilities we choose $w=\text{heaviside}(a)$
+
+\bigskip
+If we do we use \emph{logistic regression}, $\Pr(w|\vx)=\text{Bern}_w(\text{sig}(a))$
+\begin{itemize}
+    \item We model $w$ as a Bernoulli distribution
+    \item Pass $a$ through a logistic sigmoid to map it to $[0,1]$
+    \item Called \emph{logitboost} in this context
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Face Detection}
+\framesubtitle{Viola \& Jones Face Detector}
+
+This method was proposed in \cite{viola2001} \\
+Very efficient, ideal for digital cameras
+
+\bigskip
+Trades off efficiency for accuracy
+\begin{itemize}
+    \item Features capture gradients coarsely, no color information
+    \item More powerful but slower methods exist
+\end{itemize}
+
+\bigskip
+Not invariant to scale changes (fixed-size window)
+\begin{itemize}
+    \item Repeat detection at different image scales
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Face Detection}
+\framesubtitle{Viola \& Jones Face Detector in OpenCV}
+
+Detect faces using a pretrained model \\
+OpenCV also supports training
+
+\bigskip
+\small
+\begin{minted}{python}
+# detect faces using a pretrained cascade
+image = cv2.imread('faces.jpg', cv2.IMREAD_GRAYSCALE)
+cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+faces = cascade.detectMultiScale(image) # should tune parameters
+\end{minted}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+
+\begin{tikzpicture}[remember picture,overlay]
+\fill[white] (current page.north west) rectangle (current page.south east);
+\end{tikzpicture}
+
+\end{frame}
+}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Deep Learning}
+
+Selecting good features $\vx$ for object recognition is challenging
+\begin{itemize}
+    \item Why we previously learned $\vx$
+\end{itemize}
+
+\bigskip
+Learned features were low-level
+\begin{itemize}
+    \item Based on SIFT descriptors or Haar wavelets
+\end{itemize}
+
+\bigskip
+We want task-specific high-level features
+\begin{itemize}
+    \item Virtually impossible to design manually
+    \item So we learn them as well
+\end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Deep Learning}
+
+We learn these features hierarchically
+\begin{itemize}
+    \item Model consists of layers
+    \item The higher up the layer, the higher-level the feature
+    \item Features in layer $n$ are based on those in layer $n-1$
+\end{itemize}
+
+\bigskip
+This results in a \textit{deep} model, hence \emph{deep learning} \\
+At the same time we learn to predict $\vw$
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Deep Learning}
+
+\begin{center}
+    \copyrightbox[b]
+    {\includegraphics[width=7cm]{figures/dl-layer-example}}
+    {\centering Image from \cite{bengio2015}}
+\end{center}
 
 \end{frame}
 

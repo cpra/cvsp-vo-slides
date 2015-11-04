@@ -353,8 +353,8 @@ Assuming that object is far away (on \textit{plane at infinity})  % or if the ca
 
 Our problem formulation is  % this is what is used normally because it is very flexible
 \begin{itemize}
-	\item Given a pixel location in a query image
-	\item Predict location on object surface (image or world)  % the unit will depend on the problem, like cm if we are interested in measuring or pose estimation, or pixels if we want to perform detection (in this case we have a second image)
+	\item Given a pixel location in an image
+	\item Predict location on object surface (world or other image)  % the unit will depend on the problem, like cm if we are interested in measuring or pose estimation, or pixels if we want to perform detection (in this case we have a second image)
 \end{itemize}
 
 \bigskip
@@ -366,20 +366,6 @@ So we know how to select $\vx$ and $\vw$
 
 \bigskip
 As $\vw\in\RR^2$ this is a \emph{regression problem}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Planar Rigid Object Detection}
-\framesubtitle{Selecting $\vx$ and $\vw$}
-
-\begin{center}
-    \copyrightbox[b]
-    {\includegraphics[width=10cm]{figures/book-pose.pdf}}
-    {\centering Image adapted from \cite{prince12}}
-\end{center}
 
 \end{frame}
 
@@ -406,6 +392,27 @@ In homogeneous coordinates this means that
 		x \\ y \\ 1
 	\end{pmatrix}
 \]
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Planar Rigid Object Detection}
+\framesubtitle{Model Selection}
+
+\begin{center}
+    \copyrightbox[b]
+    {
+    \begin{tikzpicture}
+        \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=10cm]{figures/book-pose.pdf}};
+        \begin{scope}[x={(image.south east)},y={(image.north west)}]
+            \node [red] at (0.4,0.5) {\huge $\boldsymbol{\Phi}$};
+        \end{scope}
+    \end{tikzpicture}
+    }
+    {\centering Image adapted from \cite{prince12}}
+\end{center}
 
 \end{frame}
 
@@ -468,7 +475,7 @@ This least squares approach is optimal
 \end{itemize}
 
 \bigskip
-This is a nonlinear optimization problem
+Finding $\hat{\bth}$ is a nonlinear optimization problem
 \begin{itemize}
 	\item Solvable using any general nonlinear least squares solver % depends on a good initial estimate of the parameters (because there is no global optimum)
 	\item OpenCV has an own function \texttt{findHomography}
@@ -494,7 +501,7 @@ Where is the object in the world? % or the position and orientation of the camer
 \bigskip
 This information can be extracted from $\boldsymbol{\Phi}$
 \begin{itemize}
-    \item If we know the intrinsic camera parameters % this can also be expressed by a 3x3 matrix
+    \item If we know the intrinsic camera parameters (see below) % this can also be expressed by a 3x3 matrix
 \end{itemize}
 
 \end{frame}
@@ -649,6 +656,7 @@ cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 2, inliers)
 
 \begin{frame}\label{sift-object-detection}
 \frametitle{Nonplanar Rigid Object Detection}
+\framesubtitle{Application: Object Detection}
 
 \begin{center}
     \copyrightbox[b]
@@ -662,7 +670,7 @@ cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 2, inliers)
 
 \begin{frame}
 \frametitle{Nonplanar Rigid Object Detection}
-\framesubtitle{Stereo}
+\framesubtitle{Application: Stereo}
 
 \begin{center}
 \includegraphics[width=10cm]{figures/opencv-stereo.jpg}
@@ -674,7 +682,7 @@ cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 2, inliers)
 
 \begin{frame}
 \frametitle{Nonplanar Rigid Object Detection}
-\framesubtitle{Structure from Motion}
+\framesubtitle{Application: Structure from Motion}
 
 \begin{center}
     \copyrightbox[b]
@@ -693,13 +701,14 @@ cv::Mat homography = cv::findHomography(pobject, psearch, CV_RANSAC, 2, inliers)
 We use the same problem formulation as before
 \begin{itemize}
     \item Given a pixel location in an image $\vx$
-    \item Predict location on (nonplanar) object surface $\vw$
+    \item Predict location on object surface $\vw$
 \end{itemize}
 
 \bigskip
 As object is no longer planar, we have $\vw=(u,v,w)$
 \begin{itemize}
-    \item Location in another image can be computed easily % which is why we assume that w is in the world here
+    \item $\vw$ is a point in world coordinates
+    \item From $\vw$ we can recover corresponding $\vx$ in another image
 \end{itemize}
 
 \end{frame}
@@ -854,18 +863,18 @@ We again learn the parameters from samples $\{(\vx_i,\vw_i)\}_{i=1}^n$
 \frametitle{Nonplanar Rigid Object Detection}
 \framesubtitle{Obtaining Point Correspondences}
 
-Assume we have two images of the object \\
-Let $\vx_1,\vx_2$ be the projections of $\vw$ in these images
-
-\bigskip
-Assume we know the camera parameters (Slide~\ref{pinhole-cam-model}) but not $\vw$ \\ % for both cameras
-In this case $\vx_2$ must lie on the \emph{epipolar line} of $\vx_1$ (and vice versa)
-
-\bigskip
-Points on this line fulfill $\tilde{\vx}_2^\top\vE\,\tilde{\vx}_1=0$
+How can we again compute $\{(\vx_i,\vw_i)\}_{i=1}^n$ automatically?
 \begin{itemize}
-    \item Here $\tilde{\vx}_i$ is $\vx_i$ in homogeneous coordinates
-    \item $\vE$ is called \emph{essential matrix} (encode extrinsic relationship)
+    \item Assume we have two images of the object
+    \item Let $\vx_1,\vx_2$ be the projections of $\vw$ in these images
+\end{itemize}
+
+\bigskip
+Assume we know the camera parameters (Slide~\ref{pinhole-cam-model}) but not $\vw$
+\begin{itemize}
+    \item We can compute $\vw$ from $\vx_1$ ($\vx_2$) only up to scale
+    \item Results in a \emph{epipolar line} in the other image
+    \item $\vx_2$ ($\vx_1$) must lie on this line, so we search only there
 \end{itemize}
 
 \end{frame}
@@ -890,11 +899,18 @@ Points on this line fulfill $\tilde{\vx}_2^\top\vE\,\tilde{\vx}_1=0$
 \frametitle{Nonplanar Rigid Object Detection}
 \framesubtitle{Obtaining Point Correspondences}
 
-We can now proceed as follows
+Points on this line fulfill $\tilde{\vx}_2^\top\vE\,\tilde{\vx}_1=0$
 \begin{itemize}
-    \item Select points $\{\vx^i_1\}_{i=1}^n$ (every pixel, keypoint locations)
-    \item For each $\vx^i_1$, search for $\vx^i_2$ on the epipolar line of $\vx^i_1$ % based on pixel (patch) or descriptor similarity
-    \item If we have $\vx^i_2$, we can compute $\vw_i$ via \emph{triangulation}
+    \item Here $\tilde{\vx}_i$ is $\vx_i$ in homogeneous coordinates
+    \item $\vE$ is called \emph{essential matrix} (encodes extrinsic relationship)
+\end{itemize}
+
+\bigskip
+We can now proceed similar to before
+\begin{itemize}
+    \item Select points $\{\vx^i_1\}_{i=1}^n$ (e.g.\ every pixel, keypoint locations)
+    \item For each $\vx^i_1$ search for $\vx^i_2$ on the epipolar line of $\vx^i_1$ % based on pixel (patch) or descriptor similarity
+    \item If we have $\vx^i_2$ we can compute $\vw_i$ via \emph{triangulation}
 \end{itemize}
 
 \end{frame}
@@ -945,6 +961,9 @@ But what if we do not know the camera parameters?
 
 \bigskip
 If we know only the intrinsics, we can estimate the extrinsics
+\begin{itemize}
+    \item Estimate $\vE$ from correspondences, derive extrinsics
+\end{itemize}
 
 \bigskip
 If not, we can estimate the \emph{fundamental matrix} $\vF$
@@ -962,6 +981,9 @@ If not, we can estimate the \emph{fundamental matrix} $\vF$
 \framesubtitle{Remarks}
 
 With 3 or more images we can estimate all parameters and $\vw$ % like with sfm above
+\begin{itemize}
+    \item See above structure from motion example
+\end{itemize}
 
 \bigskip
 Camera parameters and $\vw$ influence each other
@@ -969,9 +991,6 @@ Camera parameters and $\vw$ influence each other
     \item We want to jointly optimize all parameters and all $\vw$
     \item This technique is called \emph{bundle adjustment}
 \end{itemize}
-
-\bigskip
-Lecture 183.129 has more 3D vision
 
 \end{frame}
 
@@ -985,6 +1004,9 @@ We have treated 3D reconstruction as an object detection problem
 \begin{itemize}
     \item Somewhat unorthodox but fits in nicely
 \end{itemize}
+
+\bigskip
+Lecture 183.129 has more 3D vision
 
 \bigskip
 This approach to object detection is powerful but has limitations
@@ -1031,7 +1053,7 @@ What about \textit{general} specific object recognition?
 
 \begin{frame}
 \frametitle{Nonplanar Nonrigid Object Detection}
-\framesubtitle{Face Recognition}
+\framesubtitle{Application: Face Recognition}
 
 Classic CV problem : recognize depicted person
 
@@ -1071,21 +1093,20 @@ Classic CV problem : recognize depicted person
 
 \begin{frame}
 \frametitle{Nonplanar Nonrigid Object Detection}
-\framesubtitle{Constellation Models}
+\framesubtitle{Selecting $\vx$ and $\vw$}
 
-We first select $\vx$ and $\vw$
+We describe an object by $M$ parts
 \begin{itemize}
-    \item $\vx$ : features encoding the appearance of part $i$ % here we can use whatever we like
-    \item $\vw=(u,v)$ : location of part $i$ in the image
+    \item So $\vw=(\vw_1,\dots,\vw_M)$ with $\vw_m=(u_m,v_m)$
+    \item $\vw_m$ is (relative) location of part $m$ in input image % depends on the problem, but usually we don't care where the parts are, only that they are spatially coherent. we can derive absolute locations from this later on
 \end{itemize}
 
 \bigskip
-We define a generative probabilistic model
+We extract a feature vector $\vx_m$ suitable for describing part $m$
 \begin{itemize}
-    \item $\Pr(\vx_i|\vw_i)$ encodes appearance information
-    \item $\Pr(\vw_i|\vw_j)$ encodes spatial information
+    \item Gradient histograms often work well (SIFT, HOG)
+    \item Features can vary between parts
 \end{itemize}
-
 
 \end{frame}
 
@@ -1093,17 +1114,38 @@ We define a generative probabilistic model
 
 \begin{frame}
 \frametitle{Nonplanar Nonrigid Object Detection}
-\framesubtitle{Constellation Models}
+\framesubtitle{Model Selection}
 
-And the overall probability as (assuming $n$ parts)
+We then specify individual models
+\begin{itemize}
+    \item One for each part, $\Pr(\vw_m|\vx_m)$
+    \item One for each pair of related parts, $\Pr(\vw_j|\vw_k)$
+\end{itemize}
+
+\bigskip
+And combine this to
 \[
-    \Pr(\vx_1,\dots,\vx_n|\vw_1,\dots,\vw_n) = \prod_{i=1}^n \Pr(\vx_i|\vw_i)\, \prod_{j,k}\Pr(\vw_j|\vw_k)
+    \Pr(\vw_1,\dots,\vw_M|\vx_1,\dots,\vx_M) = \prod_{m=1}^M \Pr(\vw_m|\vx_m)\, \prod_{j,k}\Pr(\vw_j|\vw_k)
 \]
 
-Finally we again
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Nonplanar Nonrigid Object Detection}
+\framesubtitle{Learning Model Parameters}
+
+We again learn the model parameters $\bth$ from training data
 \begin{itemize}
-    \item Specify the distributions $\Pr(\vx_i|\vw_i)$ and $\Pr(\vw_i|\vw_j)$ % usually we use normal distributions here
-    \item Learn the parameters $\bth$ from training data % this can be done independently for each factor 
+    \item E.g.\ using maximum likelihood like before
+    \item Parameters and learning algorithms depend on chosen models
+\end{itemize}
+
+\bigskip
+Often we care only about relative position between parts
+\begin{itemize}
+    \item \enquote{Fix} $\vw_m$, use relative positions $\vw_j,\vw_k$
 \end{itemize}
 
 \end{frame}
@@ -1112,56 +1154,31 @@ Finally we again
 
 \begin{frame}
 \frametitle{Nonplanar Nonrigid Object Detection}
-\framesubtitle{Constellation Models}
+\framesubtitle{Inference}
 
-This overall distribution is hard to compute
+We seek the $\vw$ that maximizes $\Pr(\vw_1,\dots,\vw_M|\vx_1,\dots,\vx_M)$
 
 \bigskip
-So we draw samples instead
+Doing so is NP-hard, so we draw samples instead % unless the graph connecting parts that are directly related is acyclic (the above face figure with springs corresponds to a cyclic graph)
 \begin{itemize}
-    \item For each part $i$ find locations $\vw$ for which $\Pr(\vx_i|\vw_i)>t_i$
-    \item Evaluate the overall distribution for all combinations $\vw_j,\vw_k$
-    \item Pick the $\vw_1\cdots\vw_n$ with the maximum likelihood % likelihood is the probability value of the above P(X|W)
+    \item For each part $m$ find $\{\vw_m\}$ for which $\Pr(\vw_m|\vx_m)>t_m$
+    \item Evaluate model for all combinations $\{\vw_m\}$ between parts
+    \item Pick the most likely part configuration $\vw$
 \end{itemize}
 
+\bigskip
+Approximation : might miss the most likely configuration
 \end{frame}
 
 % -----------------------------------------------------------------------------
 
 \begin{frame}
 \frametitle{Nonplanar Nonrigid Object Detection}
-\framesubtitle{Constellation Models -- Remarks}
+\framesubtitle{Remarks}
 
-This blows up quickly
+More powerful alternatives, especially if we have lots of data
 \begin{itemize}
-    \item With $m$ candidate locations per part we have $O(m^n)$
-    \item But if the relation graph is acyclic this reduces to $O(m^2n)$
-\end{itemize}
-
-\bigskip
-Work well if shape change is limited
-\begin{itemize}
-    \item Not for cats, but for faces, upright human bodies
-\end{itemize}
-
-\end{frame}
-
-% -----------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Nonplanar Nonrigid Object Detection}
-\framesubtitle{Convolutional Neural Networks (CNNs)}
-
-If we have lots of data, CNNs often perform best
-\begin{itemize}
-    \item We will cover CNNs in next lecture
-\end{itemize}
-
-\bigskip
-Outperform humans (!) in \emph{face verification}
-\begin{itemize}
-    \item Given two images, do they depict same person?
-    \item Important for HCI, security applications
+    \item Next lecture
 \end{itemize}
 
 \end{frame}
